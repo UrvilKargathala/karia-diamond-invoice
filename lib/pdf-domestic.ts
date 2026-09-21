@@ -254,8 +254,8 @@ export function generateDomesticPdf(data: DomesticInvoiceData): jsPDF {
     align: "center",
   });
   doc.text(
-    `₹ ${grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
-    pageWidth - margin - 2,
+    grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 }),
+    pageWidth - margin - 3,
     y + 5,
     { align: "right" }
   );
