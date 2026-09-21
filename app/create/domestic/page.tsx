@@ -231,7 +231,7 @@ export default function DomesticInvoicePage() {
       return;
     }
     const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-    const pdf = generateDomesticPdf(buildData());
+    const pdf = await generateDomesticPdf(buildData());
     window.open(pdf.output("bloburl") as unknown as string, "_blank");
   };
 
@@ -263,7 +263,7 @@ export default function DomesticInvoicePage() {
         const saved = await res.json();
         toast(editId ? "Invoice updated" : "Invoice saved", "success");
         const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-        const pdf = generateDomesticPdf(saved.data);
+        const pdf = await generateDomesticPdf(saved.data);
         pdf.save(`${saved.invoiceNo.replace(/\//g, "_")}.pdf`);
         setPanelOpen(false);
         fetchInvoices();
@@ -296,14 +296,14 @@ export default function DomesticInvoicePage() {
 
   const handleDownload = async (inv: StoredInvoice) => {
     const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-    const pdf = generateDomesticPdf(inv.data as DomesticInvoiceData);
+    const pdf = await generateDomesticPdf(inv.data as DomesticInvoiceData);
     pdf.save(`${inv.invoiceNo.replace(/\//g, "_")}.pdf`);
     toast("PDF downloaded", "info");
   };
 
   const handleListPreview = async (inv: StoredInvoice) => {
     const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-    const pdf = generateDomesticPdf(inv.data as DomesticInvoiceData);
+    const pdf = await generateDomesticPdf(inv.data as DomesticInvoiceData);
     window.open(pdf.output("bloburl") as unknown as string, "_blank");
   };
 

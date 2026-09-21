@@ -73,7 +73,7 @@ export default function Dashboard() {
   const handlePreview = async (inv: StoredInvoice) => {
     if (inv.type === "domestic") {
       const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-      const pdf = generateDomesticPdf(inv.data);
+      const pdf = await generateDomesticPdf(inv.data);
       window.open(pdf.output("bloburl") as unknown as string, "_blank");
     } else {
       const { generateExportPdf } = await import("@/lib/pdf-export");
@@ -85,7 +85,7 @@ export default function Dashboard() {
   const handleDownload = async (inv: StoredInvoice) => {
     if (inv.type === "domestic") {
       const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-      const pdf = generateDomesticPdf(inv.data);
+      const pdf = await generateDomesticPdf(inv.data);
       pdf.save(`${inv.invoiceNo.replace(/\//g, "_")}.pdf`);
     } else {
       const { generateExportPdf } = await import("@/lib/pdf-export");
