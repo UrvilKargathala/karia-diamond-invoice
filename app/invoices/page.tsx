@@ -107,11 +107,11 @@ export default function InvoiceHistoryPage() {
     if (inv.type === "domestic") {
       const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
       const pdf = generateDomesticPdf(inv.data);
-      window.open(pdf.output("bloburl") as string, "_blank");
+      window.open(pdf.output("bloburl") as unknown as string, "_blank");
     } else {
       const { generateExportPdf } = await import("@/lib/pdf-export");
       const pdf = generateExportPdf(inv.data);
-      window.open(pdf.output("bloburl") as string, "_blank");
+      window.open(pdf.output("bloburl") as unknown as string, "_blank");
     }
   };
 

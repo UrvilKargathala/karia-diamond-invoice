@@ -238,7 +238,7 @@ export default function ExportInvoicePage() {
     if (items.length === 0) { toast("Add at least one item first", "error"); return; }
     const { generateExportPdf } = await import("@/lib/pdf-export");
     const pdf = generateExportPdf(buildData());
-    window.open(pdf.output("bloburl") as string, "_blank");
+    window.open(pdf.output("bloburl") as unknown as string, "_blank");
   };
 
   const handleSubmit = async () => {
@@ -277,15 +277,15 @@ export default function ExportInvoicePage() {
 
   const handleDownload = async (inv: StoredInvoice) => {
     const { generateExportPdf } = await import("@/lib/pdf-export");
-    const pdf = generateExportPdf(inv.data);
+    const pdf = generateExportPdf(inv.data as ExportInvoiceData);
     pdf.save(`${inv.invoiceNo.replace(/\//g, "_")}.pdf`);
     toast("PDF downloaded", "info");
   };
 
   const handleListPreview = async (inv: StoredInvoice) => {
     const { generateExportPdf } = await import("@/lib/pdf-export");
-    const pdf = generateExportPdf(inv.data);
-    window.open(pdf.output("bloburl") as string, "_blank");
+    const pdf = generateExportPdf(inv.data as ExportInvoiceData);
+    window.open(pdf.output("bloburl") as unknown as string, "_blank");
   };
 
   const fmtUSD = (n: number) => "$ " + n.toLocaleString("en-US");

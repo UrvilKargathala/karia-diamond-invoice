@@ -1,119 +1,127 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { StoredInvoice } from "./types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const DB_PATH = path.join(DATA_DIR, "invoices.json");
-const LOCK_DIR = path.join(DATA_DIR, ".lock");
-
-async function withLock<T>(fn: () => Promise<T>): Promise<T> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  let acquired = false;
-  for (let i = 0; i < 20; i++) {
-    try {
-      await fs.mkdir(LOCK_DIR);
-      acquired = true;
-      break;
-    } catch {
-      await new Promise((r) => setTimeout(r, 50));
-    }
-  }
-  if (!acquired) throw new Error("Database is busy, try again");
-  try {
-    return await fn();
-  } finally {
-    try {
-      await fs.rmdir(LOCK_DIR);
-    } catch {}
-  }
+async function getDb() {
+  const { env } = await getCloudflareContext();
+  return (env as unknown as { DB: D1Database }).DB;
 }
 
-async function readDb(): Promise<StoredInvoice[]> {
-  try {
-    const raw = await fs.readFile(DB_PATH, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+interface D1Database {
+  prepare(query: string): D1PreparedStatement;
 }
 
-async function writeDb(invoices: StoredInvoice[]): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(DB_PATH, JSON.stringify(invoices, null, 2), "utf-8");
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
+  first<T = Record<string, unknown>>(): Promise<T | null>;
+  run(): Promise<{ success: boolean }>;
+}
+
+function rowToInvoice(row: Record<string, unknown>): StoredInvoice {
+  return {
+    id: row.id as string,
+    type: row.type as "domestic" | "export",
+    invoiceNo: row.invoice_no as string,
+    date: row.date as string,
+    buyerName: row.buyer_name as string,
+    totalAmount: row.total_amount as number,
+    currency: row.currency as string,
+    createdAt: row.created_at as string,
+    data: JSON.parse(row.data as string),
+  } as StoredInvoice;
 }
 
 export async function getAllInvoices(): Promise<StoredInvoice[]> {
-  const invoices = await readDb();
-  return invoices.sort(
-    (a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const db = await getDb();
+  const { results } = await db
+    .prepare("SELECT * FROM invoices ORDER BY created_at DESC")
+    .all();
+  return results.map(rowToInvoice);
 }
 
 export async function getInvoiceById(
   id: string
 ): Promise<StoredInvoice | undefined> {
-  const invoices = await readDb();
-  return invoices.find((inv) => inv.id === id);
+  const db = await getDb();
+  const row = await db.prepare("SELECT * FROM invoices WHERE id = ?").bind(id).first();
+  return row ? rowToInvoice(row) : undefined;
 }
 
 export async function saveInvoice(invoice: StoredInvoice): Promise<void> {
-  return withLock(async () => {
-    const invoices = await readDb();
-    invoices.push(invoice);
-    await writeDb(invoices);
-  });
+  const db = await getDb();
+  await db
+    .prepare(
+      "INSERT INTO invoices (id, type, invoice_no, date, buyer_name, total_amount, currency, created_at, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    )
+    .bind(
+      invoice.id,
+      invoice.type,
+      invoice.invoiceNo,
+      invoice.date,
+      invoice.buyerName,
+      invoice.totalAmount,
+      invoice.currency,
+      invoice.createdAt,
+      JSON.stringify(invoice.data)
+    )
+    .run();
 }
 
 export async function updateInvoice(
   id: string,
   invoice: StoredInvoice
 ): Promise<boolean> {
-  return withLock(async () => {
-    const invoices = await readDb();
-    const idx = invoices.findIndex((inv) => inv.id === id);
-    if (idx === -1) return false;
-    invoices[idx] = invoice;
-    await writeDb(invoices);
-    return true;
-  });
+  const db = await getDb();
+  const result = await db
+    .prepare(
+      "UPDATE invoices SET type = ?, invoice_no = ?, date = ?, buyer_name = ?, total_amount = ?, currency = ?, data = ? WHERE id = ?"
+    )
+    .bind(
+      invoice.type,
+      invoice.invoiceNo,
+      invoice.date,
+      invoice.buyerName,
+      invoice.totalAmount,
+      invoice.currency,
+      JSON.stringify(invoice.data),
+      id
+    )
+    .run();
+  return result.success;
 }
 
 export async function deleteInvoice(id: string): Promise<boolean> {
-  return withLock(async () => {
-    const invoices = await readDb();
-    const idx = invoices.findIndex((inv) => inv.id === id);
-    if (idx === -1) return false;
-    invoices.splice(idx, 1);
-    await writeDb(invoices);
-    return true;
-  });
+  const db = await getDb();
+  const result = await db.prepare("DELETE FROM invoices WHERE id = ?").bind(id).run();
+  return result.success;
 }
 
 export async function getNextInvoiceNumber(
   type: "domestic" | "export"
 ): Promise<string> {
-  const invoices = await readDb();
+  const db = await getDb();
   const year = new Date().getFullYear();
   const nextYear = year + 1;
   const yearSuffix = `${String(year).slice(2)}-${String(nextYear).slice(2)}`;
 
   if (type === "domestic") {
-    const nums = invoices
-      .filter((i) => i.type === "domestic")
-      .map((i) => {
-        const match = i.invoiceNo.match(/DW(\d+)/);
-        return match ? parseInt(match[1]) : 0;
-      });
+    const row = await db
+      .prepare("SELECT invoice_no FROM invoices WHERE type = 'domestic' ORDER BY created_at DESC")
+      .all();
+    const nums = row.results.map((r) => {
+      const match = (r.invoice_no as string).match(/DW(\d+)/);
+      return match ? parseInt(match[1]) : 0;
+    });
     const max = nums.length > 0 ? Math.max(...nums) : 0;
     return `KT${yearSuffix}/DW${String(max + 1).padStart(4, "0")}`;
   } else {
-    const nums = invoices
-      .filter((i) => i.type === "export")
-      .map((i) => {
-        const match = i.invoiceNo.match(/EXP\/(\d+)/);
-        return match ? parseInt(match[1]) : 0;
-      });
+    const row = await db
+      .prepare("SELECT invoice_no FROM invoices WHERE type = 'export' ORDER BY created_at DESC")
+      .all();
+    const nums = row.results.map((r) => {
+      const match = (r.invoice_no as string).match(/EXP\/(\d+)/);
+      return match ? parseInt(match[1]) : 0;
+    });
     const max = nums.length > 0 ? Math.max(...nums) : 0;
     return `BR/EXP/${String(max + 1).padStart(2, "0")}/${yearSuffix}`;
   }

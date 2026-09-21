@@ -232,7 +232,7 @@ export default function DomesticInvoicePage() {
     }
     const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
     const pdf = generateDomesticPdf(buildData());
-    window.open(pdf.output("bloburl") as string, "_blank");
+    window.open(pdf.output("bloburl") as unknown as string, "_blank");
   };
 
   const handleSubmit = async () => {
@@ -296,15 +296,15 @@ export default function DomesticInvoicePage() {
 
   const handleDownload = async (inv: StoredInvoice) => {
     const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-    const pdf = generateDomesticPdf(inv.data);
+    const pdf = generateDomesticPdf(inv.data as DomesticInvoiceData);
     pdf.save(`${inv.invoiceNo.replace(/\//g, "_")}.pdf`);
     toast("PDF downloaded", "info");
   };
 
   const handleListPreview = async (inv: StoredInvoice) => {
     const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
-    const pdf = generateDomesticPdf(inv.data);
-    window.open(pdf.output("bloburl") as string, "_blank");
+    const pdf = generateDomesticPdf(inv.data as DomesticInvoiceData);
+    window.open(pdf.output("bloburl") as unknown as string, "_blank");
   };
 
   const fmtINR = (n: number) => "₹ " + n.toLocaleString("en-IN");
