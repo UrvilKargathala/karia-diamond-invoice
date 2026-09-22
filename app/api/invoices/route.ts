@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     buyerName = e.consignee.name;
     totalAmount =
       e.items.reduce((s, i) => s + i.amount, 0) + e.shippingCharges;
-    currency = "USD";
+    currency = e.currency || "USD";
   }
 
   // body pairs `type` with matching `data`; TS can't correlate the two here

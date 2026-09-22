@@ -19,6 +19,7 @@ import Papa from "papaparse";
 import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
 import { useToast } from "@/components/toast";
+import { TableSkeleton } from "@/components/skeleton";
 import { KARIA_INDIA, GST_RATES, HSN_CODES } from "@/lib/constants";
 import type {
   DomesticInvoiceData,
@@ -248,6 +249,15 @@ export default function DomesticInvoicePage() {
       toast("GSTIN format looks invalid — save anyway or fix it", "info");
     }
 
+    if (!editId) {
+      const dup = invoices.find(
+        (i) => i.buyerName === buyer.name && i.totalAmount === grandTotal && i.date === date
+      );
+      if (dup && !confirm(`Similar invoice found (${dup.invoiceNo}) for same buyer, amount, and date. Create anyway?`)) {
+        return;
+      }
+    }
+
     setSaving(true);
     const data = buildData();
 
@@ -368,7 +378,7 @@ export default function DomesticInvoicePage() {
       {/* Invoice Table */}
       <div className="card">
         {listLoading ? (
-          <p className="text-sm text-gray-400 py-8 text-center">Loading...</p>
+          <TableSkeleton rows={4} cols={5} />
         ) : invoices.length === 0 ? (
           <p className="text-sm text-gray-400 py-8 text-center">
             No domestic invoices yet. Click &quot;New Domestic Invoice&quot; to create one.

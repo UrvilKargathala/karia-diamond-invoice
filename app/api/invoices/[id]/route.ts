@@ -55,7 +55,7 @@ export async function PUT(
     buyerName = e.consignee.name;
     totalAmount =
       e.items.reduce((s, i) => s + i.amount, 0) + e.shippingCharges;
-    currency = "USD";
+    currency = e.currency || "USD";
   }
 
   const updated = {

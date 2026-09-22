@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-primary: #1a1a2e;
   --color-accent: #0f3460;
@@ -18,6 +20,7 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   color: var(--color-text);
   background: var(--color-surface-alt);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 input, select, textarea {
@@ -31,7 +34,8 @@ input, select, textarea {
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
-  background: white;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .form-input:focus {
@@ -73,7 +77,7 @@ input, select, textarea {
 }
 
 .btn-outline {
-  background: white;
+  background: var(--color-surface);
   color: var(--color-text);
   border-color: var(--color-border);
 }
@@ -92,13 +96,72 @@ input, select, textarea {
 }
 
 .card {
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 24px;
 }
 
-@keyframes slideIn {
+/* Dark mode */
+html.dark {
+  --color-primary: #2d2d4e;
+  --color-accent: #4a6fa5;
+  --color-surface: #1e1e2e;
+  --color-surface-alt: #141420;
+  --color-border: #2e2e42;
+  --color-text: #e2e8f0;
+  --color-text-muted: #a0aec0;
+}
+
+html.dark .btn-primary {
+  background: #4a6fa5;
+}
+
+html.dark .btn-primary:hover {
+  background: #5a7fb5;
+}
+
+html.dark .form-input:focus {
+  box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+}
+
+html.dark dialog {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+html.dark dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Skeleton loader */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-alt) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Toast animations */
+@keyframes toastIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+.toast-enter {
+  animation: toastIn 0.3s ease-out;
+}
+
+.toast-exit {
+  animation: toastOut 0.3s ease-in forwards;
 }

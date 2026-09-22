@@ -1,8 +1,12 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import QRCode from "qrcode";
 import type { DomesticInvoiceData } from "./types";
 import { numberToWords, formatDate, roundOff } from "./utils";
+
+async function generateQrDataUrl(text: string): Promise<string> {
+  const QRCode = (await import("qrcode")).default;
+  return QRCode.toDataURL(text, { width: 200, margin: 1 });
+}
 
 export async function generateDomesticPdf(data: DomesticInvoiceData): Promise<jsPDF> {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -35,20 +39,21 @@ export async function generateDomesticPdf(data: DomesticInvoiceData): Promise<js
     totalAmount: subtotalForQr,
     items: data.items.length,
   });
-  const qrDataUrl = await QRCode.toDataURL(qrData, { width: 200, margin: 1 });
+  const qrDataUrl = await generateQrDataUrl(qrData);
 
-  // ─── Title ───
+  // ─── Title + QR row ───
+  const qrSize = 22;
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("Tax Invoice", pageWidth / 2 - 15, y + 6, { align: "center" });
+  doc.text("Tax Invoice", pageWidth / 2, y + 6, { align: "center" });
 
-  // e-Invoice label + QR code (top right)
-  doc.setFontSize(8);
+  // e-Invoice label + QR code (top right, within title row)
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
-  doc.text("e-Invoice", pageWidth - margin - 15, y + 2);
-  doc.addImage(qrDataUrl, "PNG", pageWidth - margin - 28, y + 3, 25, 25);
+  doc.text("e-Invoice", pageWidth - margin - qrSize / 2, y + 2, { align: "center" });
+  doc.addImage(qrDataUrl, "PNG", pageWidth - margin - qrSize - 1, y + 3, qrSize, qrSize);
 
-  y += 10;
+  y += qrSize + 5;
   drawLine(y);
 
   // ─── Seller & Invoice Details Header ───

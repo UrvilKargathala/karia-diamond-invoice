@@ -10,15 +10,20 @@ import {
   Home as HomeIcon,
   X,
   LogOut,
+  Moon,
+  Sun,
+  BarChart3,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useAuth } from "./auth";
+import { useTheme } from "@/components/theme";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/create/domestic", label: "Domestic Invoice", icon: FilePlus },
   { href: "/create/export", label: "Export Invoice", icon: Globe },
   { href: "/invoices", label: "Invoice History", icon: FileText },
+  { href: "/reports", label: "Reports", icon: BarChart3 },
 ];
 
 export function Sidebar({
@@ -30,6 +35,7 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { dark, toggle } = useTheme();
 
   return (
     <aside
@@ -38,16 +44,16 @@ export function Sidebar({
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
-      <div className="p-6 border-b border-white/10 flex items-center justify-between">
+      <div className="p-5 border-b border-white/10 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3" onClick={onNavigate}>
-          <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
-            <HomeIcon size={18} />
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <HomeIcon size={16} className="text-white" />
           </div>
           <div>
-            <div className="font-semibold text-sm tracking-wide">
+            <div className="font-bold text-sm tracking-wide">
               KARIA DIAMOND
             </div>
-            <div className="text-[11px] text-white/50">Invoice Generator</div>
+            <div className="text-[10px] text-white/40 font-medium">Invoice Generator</div>
           </div>
         </Link>
         <button
@@ -58,7 +64,10 @@ export function Sidebar({
         </button>
       </div>
 
-      <nav className="flex-1 py-4 px-3 space-y-1">
+      <nav className="flex-1 py-3 px-3 space-y-0.5">
+        <div className="px-3 py-2 text-[10px] font-bold text-white/30 uppercase tracking-widest">
+          Menu
+        </div>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -70,28 +79,35 @@ export function Sidebar({
               href={item.href}
               onClick={onNavigate}
               className={clsx(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
                 isActive
-                  ? "bg-white/15 text-white"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white border border-white/10"
+                  : "text-white/50 hover:text-white hover:bg-white/5"
               )}
             >
-              <Icon size={18} />
+              <Icon size={17} className={isActive ? "text-blue-400" : ""} />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/10 space-y-3">
+      <div className="p-3 border-t border-white/10 space-y-1">
+        <button
+          onClick={toggle}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors w-full"
+        >
+          {dark ? <Sun size={17} /> : <Moon size={17} />}
+          {dark ? "Light Mode" : "Dark Mode"}
+        </button>
         <button
           onClick={logout}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors w-full"
         >
-          <LogOut size={18} />
+          <LogOut size={17} />
           Sign Out
         </button>
-        <div className="text-[11px] text-white/30">Karia India LLP</div>
+        <div className="text-[10px] text-white/20 px-3 pt-1">Karia India LLP</div>
       </div>
     </aside>
   );

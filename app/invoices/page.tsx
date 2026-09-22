@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useToast } from "@/components/toast";
+import { TableSkeleton } from "@/components/skeleton";
 import type { StoredInvoice } from "@/lib/types";
 
 const PAGE_SIZE = 15;
@@ -218,7 +219,7 @@ export default function InvoiceHistoryPage() {
       {/* Table */}
       <div className="card">
         {loading ? (
-          <p className="text-sm text-gray-400 py-8 text-center">Loading...</p>
+          <TableSkeleton rows={5} cols={6} />
         ) : filtered.length === 0 ? (
           <p className="text-sm text-gray-400 py-8 text-center">
             {invoices.length === 0

@@ -104,6 +104,7 @@ export interface ExportInvoiceData {
   cvdCode?: string;
   lutArnNo?: string;
   lutArnDate?: string;
+  currency?: string;
 }
 
 // ─── Stored Invoice ───

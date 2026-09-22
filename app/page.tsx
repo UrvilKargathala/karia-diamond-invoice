@@ -17,6 +17,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useToast } from "@/components/toast";
+import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
 import type { StoredInvoice } from "@/lib/types";
 
 export default function Dashboard() {
@@ -100,7 +101,7 @@ export default function Dashboard() {
       {/* Welcome Header */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{greeting}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{greeting}</h1>
           <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
             <CalendarDays size={14} />
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
@@ -113,76 +114,78 @@ export default function Dashboard() {
       </div>
 
       {/* KPI Cards */}
+      {loading ? <KpiSkeleton /> : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="card">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-              <FileText size={18} className="text-blue-600" />
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+              <FileText size={18} className="text-blue-600 dark:text-blue-400" />
             </div>
             <div className="flex items-center gap-1 text-xs font-medium text-green-600">
               {trend === "up" ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
               {trendDiff} vs last mo
             </div>
           </div>
-          <p className="text-2xl font-bold">{loading ? "-" : stats.total}</p>
+          <p className="text-2xl font-bold">{stats.total}</p>
           <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
         </div>
 
         <div className="card">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-              <FilePlus size={18} className="text-green-600" />
+            <div className="w-9 h-9 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
+              <FilePlus size={18} className="text-green-600 dark:text-green-400" />
             </div>
           </div>
-          <p className="text-2xl font-bold">{loading ? "-" : stats.domestic}</p>
+          <p className="text-2xl font-bold">{stats.domestic}</p>
           <p className="text-xs text-gray-500 mt-0.5">Domestic Invoices</p>
         </div>
 
         <div className="card">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
-              <Globe size={18} className="text-purple-600" />
+            <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
+              <Globe size={18} className="text-purple-600 dark:text-purple-400" />
             </div>
           </div>
-          <p className="text-2xl font-bold">{loading ? "-" : stats.export}</p>
+          <p className="text-2xl font-bold">{stats.export}</p>
           <p className="text-xs text-gray-500 mt-0.5">Export Invoices</p>
         </div>
 
         <div className="card">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-              <CalendarDays size={18} className="text-amber-600" />
+            <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+              <CalendarDays size={18} className="text-amber-600 dark:text-amber-400" />
             </div>
           </div>
-          <p className="text-2xl font-bold">{loading ? "-" : stats.thisMonth}</p>
+          <p className="text-2xl font-bold">{stats.thisMonth}</p>
           <p className="text-xs text-gray-500 mt-0.5">This Month</p>
         </div>
       </div>
+      )}
 
       {/* Revenue Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="card bg-gradient-to-br from-blue-50 to-white border-blue-100">
+        <div className="card bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-[var(--color-surface)] border-blue-100 dark:border-blue-800/30">
           <div className="flex items-center gap-2 mb-2">
-            <IndianRupee size={16} className="text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Domestic Revenue</span>
+            <IndianRupee size={16} className="text-blue-600 dark:text-blue-400" />
+            <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Domestic Revenue</span>
           </div>
-          <p className="text-2xl font-bold text-blue-900">
+          <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
             {loading ? "-" : `₹ ${stats.totalINR.toLocaleString("en-IN")}`}
           </p>
-          <p className="text-xs text-blue-600/70 mt-1">
+          <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-1">
             This month: ₹ {stats.thisMonthINR.toLocaleString("en-IN")}
           </p>
         </div>
 
-        <div className="card bg-gradient-to-br from-purple-50 to-white border-purple-100">
+        <div className="card bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-[var(--color-surface)] border-purple-100 dark:border-purple-800/30">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign size={16} className="text-purple-600" />
-            <span className="text-sm font-medium text-purple-800">Export Revenue</span>
+            <DollarSign size={16} className="text-purple-600 dark:text-purple-400" />
+            <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Export Revenue</span>
           </div>
-          <p className="text-2xl font-bold text-purple-900">
+          <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
             {loading ? "-" : `$ ${stats.totalUSD.toLocaleString("en-US")}`}
           </p>
-          <p className="text-xs text-purple-600/70 mt-1">
+          <p className="text-xs text-purple-600/70 dark:text-purple-400/70 mt-1">
             This month: $ {stats.thisMonthUSD.toLocaleString("en-US")}
           </p>
         </div>
@@ -202,7 +205,7 @@ export default function Dashboard() {
             </Link>
           </div>
           {loading ? (
-            <p className="text-sm text-gray-400 py-8 text-center">Loading...</p>
+            <TableSkeleton rows={5} cols={4} />
           ) : recent.length === 0 ? (
             <div className="py-10 text-center">
               <FileText size={32} className="text-gray-200 mx-auto mb-3" />
@@ -213,7 +216,7 @@ export default function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-gray-500 border-b">
+                  <tr className="text-left text-gray-500 border-b whitespace-nowrap">
                     <th className="pb-2 font-medium">Invoice</th>
                     <th className="pb-2 font-medium">Buyer</th>
                     <th className="pb-2 font-medium">Date</th>
@@ -230,7 +233,7 @@ export default function Dashboard() {
                           <span className="font-mono text-xs">{inv.invoiceNo}</span>
                         </div>
                       </td>
-                      <td className="py-3 text-gray-600">{inv.buyerName}</td>
+                      <td className="py-3 text-gray-600 dark:text-gray-300">{inv.buyerName}</td>
                       <td className="py-3 text-gray-500 text-xs">
                         {new Date(inv.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
                       </td>
@@ -293,7 +296,7 @@ export default function Dashboard() {
           </Link>
 
           {/* Mini summary */}
-          <div className="card bg-gray-50 border-dashed">
+          <div className="card bg-gray-50 dark:bg-gray-800/30 border-dashed">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp size={14} className="text-gray-400" />
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Month Summary</span>

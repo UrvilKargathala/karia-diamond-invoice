@@ -19,6 +19,7 @@ import Papa from "papaparse";
 import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
 import { useToast } from "@/components/toast";
+import { TableSkeleton } from "@/components/skeleton";
 import { BRILLIANT_LABGROWN, KARIA_DIAMONDS_INC } from "@/lib/constants";
 import type {
   ExportInvoiceData,
@@ -73,6 +74,7 @@ export default function ExportInvoicePage() {
   const [paymentTerms, setPaymentTerms] = useState("Advance");
   const [lutArnNo, setLutArnNo] = useState("AD2403260556888R");
   const [lutArnDate, setLutArnDate] = useState("28-03-2026");
+  const [currency, setCurrency] = useState("USD");
 
   const [consignee, setConsignee] = useState<CompanyInfo>({ ...KARIA_DIAMONDS_INC });
   const [shipping, setShipping] = useState<ShippingDetails>({
@@ -135,6 +137,7 @@ export default function ExportInvoicePage() {
     setPaymentTerms("Advance");
     setLutArnNo("AD2403260556888R");
     setLutArnDate("28-03-2026");
+    setCurrency("USD");
     setConsignee({ ...KARIA_DIAMONDS_INC });
     setShipping({
       preCarriageBy: "M.A EXPRESS", placeOfReceipt: "N.A.", vesselFlightNo: "",
@@ -162,6 +165,7 @@ export default function ExportInvoicePage() {
         setPaymentTerms(d.paymentTerms);
         setLutArnNo(d.lutArnNo || "");
         setLutArnDate(d.lutArnDate || "");
+        setCurrency((d as ExportInvoiceData & { currency?: string }).currency || "USD");
         setConsignee(d.consignee);
         setShipping(d.shipping);
         setItems(d.items);
@@ -229,10 +233,13 @@ export default function ExportInvoicePage() {
   const goodsTotal = items.reduce((s, i) => s + i.amount, 0);
   const cifTotal = goodsTotal + shippingCharges;
 
+  const currSymbol = currency === "USD" ? "US$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : currency === "AED" ? "AED" : currency === "HKD" ? "HK$" : currency;
+
   const buildData = (): ExportInvoiceData => ({
     invoiceNo, date, exporterRef: BRILLIANT_LABGROWN.iecNo || "", exporter: BRILLIANT_LABGROWN,
     consignee, shipping, paymentTerms, items, packingList, shippingCharges, lutArnNo, lutArnDate,
-  });
+    currency,
+  } as ExportInvoiceData);
 
   const handlePreview = async () => {
     if (items.length === 0) { toast("Add at least one item first", "error"); return; }
@@ -244,6 +251,15 @@ export default function ExportInvoicePage() {
   const handleSubmit = async () => {
     if (!consignee.name.trim()) { toast("Consignee name is required", "error"); return; }
     if (items.length === 0 || items.every((i) => i.amount === 0)) { toast("Add at least one item with amount > 0", "error"); return; }
+
+    if (!editId) {
+      const dup = invoices.find(
+        (i) => i.buyerName === consignee.name && i.totalAmount === cifTotal && i.date === date
+      );
+      if (dup && !confirm(`Similar invoice found (${dup.invoiceNo}) for same consignee, amount, and date. Create anyway?`)) {
+        return;
+      }
+    }
 
     setSaving(true);
     try {
@@ -288,7 +304,7 @@ export default function ExportInvoicePage() {
     window.open(pdf.output("bloburl") as unknown as string, "_blank");
   };
 
-  const fmtUSD = (n: number) => "$ " + n.toLocaleString("en-US");
+  const fmtCurr = (n: number) => `${currSymbol} ${n.toLocaleString("en-US")}`;
 
   return (
     <div>
@@ -309,11 +325,11 @@ export default function ExportInvoicePage() {
         </div>
         <div className="card flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600"><DollarSign size={20} /></div>
-          <div><p className="text-xs text-gray-500">Total Value</p><p className="text-xl font-bold">{fmtUSD(kpis.totalValue)}</p></div>
+          <div><p className="text-xs text-gray-500">Total Value</p><p className="text-xl font-bold">{fmtCurr(kpis.totalValue)}</p></div>
         </div>
         <div className="card flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600"><TrendingUp size={20} /></div>
-          <div><p className="text-xs text-gray-500">Avg Invoice</p><p className="text-xl font-bold">{fmtUSD(kpis.avg)}</p></div>
+          <div><p className="text-xs text-gray-500">Avg Invoice</p><p className="text-xl font-bold">{fmtCurr(kpis.avg)}</p></div>
         </div>
         <div className="card flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><CalendarDays size={20} /></div>
@@ -324,7 +340,7 @@ export default function ExportInvoicePage() {
       {/* Invoice Table */}
       <div className="card">
         {listLoading ? (
-          <p className="text-sm text-gray-400 py-8 text-center">Loading...</p>
+          <TableSkeleton rows={4} cols={5} />
         ) : invoices.length === 0 ? (
           <p className="text-sm text-gray-400 py-8 text-center">No export invoices yet. Click &quot;New Export Invoice&quot; to create one.</p>
         ) : (
@@ -335,7 +351,7 @@ export default function ExportInvoicePage() {
                   <th className="pb-2 font-medium">Invoice No.</th>
                   <th className="pb-2 font-medium">Consignee</th>
                   <th className="pb-2 font-medium">Date</th>
-                  <th className="pb-2 font-medium text-right">Amount (US$)</th>
+                  <th className="pb-2 font-medium text-right">Amount ({currSymbol})</th>
                   <th className="pb-2 font-medium text-right">Actions</th>
                 </tr>
               </thead>
@@ -345,7 +361,7 @@ export default function ExportInvoicePage() {
                     <td className="py-3 font-mono text-xs">{inv.invoiceNo}</td>
                     <td className="py-3">{inv.buyerName}</td>
                     <td className="py-3 text-gray-500">{new Date(inv.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
-                    <td className="py-3 text-right font-medium">{fmtUSD(inv.totalAmount)}</td>
+                    <td className="py-3 text-right font-medium">{fmtCurr(inv.totalAmount)}</td>
                     <td className="py-3 text-right">
                       <div className="flex gap-0.5 justify-end">
                         <button onClick={() => handleListPreview(inv)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded hover:bg-indigo-50" title="Preview PDF"><Eye size={14} /></button>
@@ -374,6 +390,16 @@ export default function ExportInvoicePage() {
             <div><label className="form-label">Payment Terms</label><input type="text" className="form-input" value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} /></div>
             <div><label className="form-label">LUT/ARN No.</label><input type="text" className="form-input" value={lutArnNo} onChange={(e) => setLutArnNo(e.target.value)} /></div>
             <div><label className="form-label">LUT/ARN Date</label><input type="text" className="form-input" value={lutArnDate} onChange={(e) => setLutArnDate(e.target.value)} /></div>
+            <div>
+              <label className="form-label">Currency</label>
+              <select className="form-input" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="AED">AED</option>
+                <option value="HKD">HKD (HK$)</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -434,9 +460,9 @@ export default function ExportInvoicePage() {
           </div>
           <div className="mt-4 border-t pt-4 flex justify-end">
             <div className="w-64 space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-500">Goods Total</span><span>US$ {goodsTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Goods Total</span><span>{currSymbol} {goodsTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
               <div className="flex justify-between items-center"><span className="text-gray-500">Shipping</span><input type="number" className="form-input w-24 text-right" value={shippingCharges || ""} onChange={(e) => setShippingCharges(parseFloat(e.target.value) || 0)} /></div>
-              <div className="flex justify-between border-t pt-2 text-base font-bold"><span>CIF Total</span><span>US$ {cifTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between border-t pt-2 text-base font-bold"><span>CIF Total</span><span>{currSymbol} {cifTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
             </div>
           </div>
         </div>
@@ -500,8 +526,8 @@ export default function ExportInvoicePage() {
           <div className="col-span-2"><label className="form-label">Type / Shape / Colour / Clarity</label><textarea className="form-input text-xs" rows={3} required autoFocus value={itemDraft.item.typeShapeColourClarity} onChange={(e) => setItemField("typeShapeColourClarity", e.target.value)} /></div>
           <div className="col-span-2"><label className="form-label">HSN Code</label><input type="text" className="form-input" value={itemDraft.item.hsnCode} onChange={(e) => setItemField("hsnCode", e.target.value)} /></div>
           <div><label className="form-label">Carats</label><input type="number" step="any" min="0" required className="form-input" value={itemDraft.item.carats || ""} onChange={(e) => setItemField("carats", parseFloat(e.target.value) || 0)} /></div>
-          <div><label className="form-label">Rate / Carat (US$)</label><input type="number" step="any" min="0" required className="form-input" value={itemDraft.item.ratePerCarat || ""} onChange={(e) => setItemField("ratePerCarat", parseFloat(e.target.value) || 0)} /></div>
-          <div className="col-span-2 flex justify-between border-t pt-3 text-sm"><span className="text-gray-500">Amount</span><span className="font-semibold">US$ {itemDraftAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
+          <div><label className="form-label">Rate / Carat ({currSymbol})</label><input type="number" step="any" min="0" required className="form-input" value={itemDraft.item.ratePerCarat || ""} onChange={(e) => setItemField("ratePerCarat", parseFloat(e.target.value) || 0)} /></div>
+          <div className="col-span-2 flex justify-between border-t pt-3 text-sm"><span className="text-gray-500">Amount</span><span className="font-semibold">{currSymbol} {itemDraftAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
         </>)}
       </Modal>
 
@@ -515,8 +541,8 @@ export default function ExportInvoicePage() {
           <div><label className="form-label">Size</label><input type="text" className="form-input" value={stoneDraft.item.size} onChange={(e) => setStoneField("size", e.target.value)} /></div>
           <div><label className="form-label">Pcs</label><input type="number" step="1" min="0" required className="form-input" value={stoneDraft.item.pcs || ""} onChange={(e) => setStoneField("pcs", parseInt(e.target.value) || 0)} /></div>
           <div><label className="form-label">Weight (Cts)</label><input type="number" step="any" min="0" required className="form-input" value={stoneDraft.item.weight || ""} onChange={(e) => setStoneField("weight", parseFloat(e.target.value) || 0)} /></div>
-          <div><label className="form-label">Price / Ct (US$)</label><input type="number" step="any" min="0" required className="form-input" value={stoneDraft.item.pricePerCt || ""} onChange={(e) => setStoneField("pricePerCt", parseFloat(e.target.value) || 0)} /></div>
-          <div className="col-span-2 flex justify-between border-t pt-3 text-sm"><span className="text-gray-500">Amount</span><span className="font-semibold">US$ {stoneDraftAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
+          <div><label className="form-label">Price / Ct ({currSymbol})</label><input type="number" step="any" min="0" required className="form-input" value={stoneDraft.item.pricePerCt || ""} onChange={(e) => setStoneField("pricePerCt", parseFloat(e.target.value) || 0)} /></div>
+          <div className="col-span-2 flex justify-between border-t pt-3 text-sm"><span className="text-gray-500">Amount</span><span className="font-semibold">{currSymbol} {stoneDraftAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
         </>)}
       </Modal>
     </div>
