@@ -123,3 +123,45 @@ interface StoredInvoiceBase {
 export type StoredInvoice =
   | (StoredInvoiceBase & { type: "domestic"; data: DomesticInvoiceData })
   | (StoredInvoiceBase & { type: "export"; data: ExportInvoiceData });
+
+// ─── Note ───
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  pinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Consignment Memo ───
+// Goods sent to a buyer on approval, not yet sold. Either converts into a real
+// invoice once the buyer confirms purchase, or is marked returned.
+
+export interface MemoLineItem {
+  slNo: number;
+  description: string;
+  hsnCode: string;
+  quantity: number;
+  unit: string;
+  rate: number;
+  amount: number;
+}
+
+export type MemoStatus = "pending" | "sold" | "returned";
+
+export interface ConsignmentMemo {
+  id: string;
+  memoNo: string;
+  type: "domestic" | "export";
+  date: string;
+  currency: string;
+  buyer: CompanyInfo;
+  items: MemoLineItem[];
+  totalAmount: number;
+  status: MemoStatus;
+  invoiceId?: string;
+  createdAt: string;
+  updatedAt: string;
+}

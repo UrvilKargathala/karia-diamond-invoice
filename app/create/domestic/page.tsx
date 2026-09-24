@@ -19,13 +19,15 @@ import Papa from "papaparse";
 import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
 import { useToast } from "@/components/toast";
-import { TableSkeleton } from "@/components/skeleton";
+import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
+import { Sparkline, getMonthlyBuckets, getMonthlyValues } from "@/components/sparkline";
 import { KARIA_INDIA, GST_RATES, HSN_CODES } from "@/lib/constants";
 import type {
   DomesticInvoiceData,
   DomesticLineItem,
   CompanyInfo,
   StoredInvoice,
+  ConsignmentMemo,
 } from "@/lib/types";
 
 const emptyBuyer: CompanyInfo = {
@@ -72,6 +74,7 @@ export default function DomesticInvoicePage() {
     index: number | null;
     item: DomesticLineItem;
   } | null>(null);
+  const [fromMemoId, setFromMemoId] = useState<string | null>(null);
 
   const fetchInvoices = () => {
     setListLoading(true);
@@ -90,8 +93,23 @@ export default function DomesticInvoicePage() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     const clone = params.get("clone");
+    const fromMemo = params.get("fromMemo");
     if (id || clone) openEdit(id || clone!, !!id);
+    else if (fromMemo) openFromMemo(fromMemo);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openFromMemo = (memoId: string) => {
+    fetch(`/api/memos/${memoId}`)
+      .then((r) => r.json())
+      .then((memo: ConsignmentMemo) => {
+        resetForm();
+        setFromMemoId(memoId);
+        setBuyer(memo.buyer);
+        setItems(memo.items);
+        setPanelOpen(true);
+      })
+      .catch(() => toast("Failed to load memo", "error"));
+  };
 
   // --- KPIs ---
   const kpis = useMemo(() => {
@@ -103,7 +121,12 @@ export default function DomesticInvoicePage() {
       const d = new Date(i.date);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
-    return { total, totalValue, avg, thisMonth };
+    const dates = invoices.map((i) => i.date);
+    return {
+      total, totalValue, avg, thisMonth,
+      sparkCount: getMonthlyBuckets(dates),
+      sparkValue: getMonthlyValues(invoices.map((i) => ({ date: i.date, amount: i.totalAmount }))),
+    };
   }, [invoices]);
 
   // --- Form helpers ---
@@ -119,6 +142,7 @@ export default function DomesticInvoicePage() {
     setGstCategory("rough");
     setItems([]);
     setDraft(null);
+    setFromMemoId(null);
   };
 
   const openNew = () => {
@@ -272,6 +296,13 @@ export default function DomesticInvoicePage() {
       if (res.ok) {
         const saved = await res.json();
         toast(editId ? "Invoice updated" : "Invoice saved", "success");
+        if (fromMemoId) {
+          fetch(`/api/memos/${fromMemoId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "sold", invoiceId: saved.id }),
+          }).catch(() => {});
+        }
         const { generateDomesticPdf } = await import("@/lib/pdf-domestic");
         const pdf = await generateDomesticPdf(saved.data);
         pdf.save(`${saved.invoiceNo.replace(/\//g, "_")}.pdf`);
@@ -336,44 +367,50 @@ export default function DomesticInvoicePage() {
       </div>
 
       {/* KPI Cards */}
+      {listLoading ? <KpiSkeleton /> : (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-            <FileText size={20} />
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+              <FileText size={18} />
+            </div>
+            <Sparkline data={kpis.sparkCount} color="#3b82f6" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Total Invoices</p>
-            <p className="text-xl font-bold">{kpis.total}</p>
-          </div>
+          <p className="text-xl font-bold">{kpis.total}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
-            <IndianRupee size={20} />
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
+              <IndianRupee size={18} />
+            </div>
+            <Sparkline data={kpis.sparkValue} color="#16a34a" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Total Value</p>
-            <p className="text-xl font-bold">{fmtINR(kpis.totalValue)}</p>
-          </div>
+          <p className="text-xl font-bold">{fmtINR(kpis.totalValue)}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Total Value</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
-            <TrendingUp size={20} />
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+              <TrendingUp size={18} />
+            </div>
+            <Sparkline data={kpis.sparkValue} color="#9333ea" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Avg Invoice</p>
-            <p className="text-xl font-bold">{fmtINR(kpis.avg)}</p>
-          </div>
+          <p className="text-xl font-bold">{fmtINR(kpis.avg)}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Avg Invoice</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-            <CalendarDays size={20} />
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+              <CalendarDays size={18} />
+            </div>
+            <Sparkline data={kpis.sparkCount} color="#d97706" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">This Month</p>
-            <p className="text-xl font-bold">{kpis.thisMonth}</p>
-          </div>
+          <p className="text-xl font-bold">{kpis.thisMonth}</p>
+          <p className="text-xs text-gray-500 mt-0.5">This Month</p>
         </div>
       </div>
+      )}
 
       {/* Invoice Table */}
       <div className="card">

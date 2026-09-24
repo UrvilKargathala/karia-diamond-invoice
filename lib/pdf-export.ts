@@ -206,23 +206,20 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
   // ─── Items Table ───
   const itemsBody = data.items.map((item, i) => [
     (i + 1).toString(),
-    `TYPE / SHAPE / COLOUR & CLARITY\n${item.typeShapeColourClarity}`,
-    item.hsnCode,
+    `TYPE / SHAPE / COLOUR & CLARITY\n${item.typeShapeColourClarity}\nH.S. CODE:- ${item.hsnCode}`,
     item.carats.toLocaleString("en-US", { minimumFractionDigits: 2 }),
     item.ratePerCarat.toLocaleString("en-US", { minimumFractionDigits: 2 }),
     item.amount.toLocaleString("en-US", { minimumFractionDigits: 2 }),
   ]);
 
   const goodsTotal = data.items.reduce((s, i) => s + i.amount, 0);
-  const totalCarats = data.items.reduce((s, i) => s + i.carats, 0);
 
   autoTable(doc, {
     startY: y,
     head: [
       [
         "Sr No.",
-        "Description of Goods\nH.S. CODE:- 71049110",
-        "",
+        "Description of Goods",
         "Cts",
         "Rate\nUS$",
         "Amount\nUS$",
@@ -245,10 +242,9 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
       1: { cellWidth: 75 },
-      2: { cellWidth: 0 },
-      3: { cellWidth: 20, halign: "right" },
-      4: { cellWidth: 25, halign: "right" },
-      5: { cellWidth: contentWidth - 132, halign: "right" },
+      2: { cellWidth: 20, halign: "right" },
+      3: { cellWidth: 25, halign: "right" },
+      4: { cellWidth: contentWidth - 132, halign: "right" },
     },
     margin: { left: margin, right: margin },
   });
@@ -258,9 +254,8 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
 
   // ─── Shipping Charges & CIF ───
   const summaryData = [
-    ["", "", "", "", "SHIPPING CHARGES", data.shippingCharges.toLocaleString("en-US", { minimumFractionDigits: 2 })],
+    ["", "", "", "SHIPPING CHARGES", data.shippingCharges.toLocaleString("en-US", { minimumFractionDigits: 2 })],
     [
-      "",
       "",
       "",
       "",
@@ -281,8 +276,8 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
       fontStyle: "bold",
     },
     columnStyles: {
+      3: { halign: "right" },
       4: { halign: "right" },
-      5: { halign: "right" },
     },
     margin: { left: margin, right: margin },
   });

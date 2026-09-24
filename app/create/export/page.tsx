@@ -19,7 +19,8 @@ import Papa from "papaparse";
 import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
 import { useToast } from "@/components/toast";
-import { TableSkeleton } from "@/components/skeleton";
+import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
+import { Sparkline, getMonthlyBuckets, getMonthlyValues } from "@/components/sparkline";
 import { BRILLIANT_LABGROWN, KARIA_DIAMONDS_INC } from "@/lib/constants";
 import type {
   ExportInvoiceData,
@@ -28,6 +29,7 @@ import type {
   CompanyInfo,
   ShippingDetails,
   StoredInvoice,
+  ConsignmentMemo,
 } from "@/lib/types";
 
 const emptyItem: ExportLineItem = {
@@ -96,6 +98,7 @@ export default function ExportInvoicePage() {
 
   const [itemDraft, setItemDraft] = useState<{ index: number | null; item: ExportLineItem } | null>(null);
   const [stoneDraft, setStoneDraft] = useState<{ index: number | null; item: PackingListItem } | null>(null);
+  const [fromMemoId, setFromMemoId] = useState<string | null>(null);
 
   const fetchInvoices = () => {
     setListLoading(true);
@@ -113,8 +116,33 @@ export default function ExportInvoicePage() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     const clone = params.get("clone");
+    const fromMemo = params.get("fromMemo");
     if (id || clone) openEdit(id || clone!, !!id);
+    else if (fromMemo) openFromMemo(fromMemo);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openFromMemo = (memoId: string) => {
+    fetch(`/api/memos/${memoId}`)
+      .then((r) => r.json())
+      .then((memo: ConsignmentMemo) => {
+        resetForm();
+        setFromMemoId(memoId);
+        setCurrency(memo.currency);
+        setConsignee(memo.buyer);
+        setItems(
+          memo.items.map((it) => ({
+            slNo: it.slNo,
+            typeShapeColourClarity: it.description,
+            hsnCode: it.hsnCode,
+            carats: it.quantity,
+            ratePerCarat: it.rate,
+            amount: it.amount,
+          }))
+        );
+        setPanelOpen(true);
+      })
+      .catch(() => toast("Failed to load memo", "error"));
+  };
 
   // --- KPIs ---
   const kpis = useMemo(() => {
@@ -126,7 +154,12 @@ export default function ExportInvoicePage() {
       const d = new Date(i.date);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
-    return { total, totalValue, avg, thisMonth };
+    const dates = invoices.map((i) => i.date);
+    return {
+      total, totalValue, avg, thisMonth,
+      sparkCount: getMonthlyBuckets(dates),
+      sparkValue: getMonthlyValues(invoices.map((i) => ({ date: i.date, amount: i.totalAmount }))),
+    };
   }, [invoices]);
 
   // --- Form helpers ---
@@ -149,6 +182,7 @@ export default function ExportInvoicePage() {
     setShippingCharges(250);
     setItemDraft(null);
     setStoneDraft(null);
+    setFromMemoId(null);
   };
 
   const openNew = () => { resetForm(); setPanelOpen(true); };
@@ -269,6 +303,13 @@ export default function ExportInvoicePage() {
       if (res.ok) {
         const saved = await res.json();
         toast(editId ? "Invoice updated" : "Invoice saved", "success");
+        if (fromMemoId) {
+          fetch(`/api/memos/${fromMemoId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "sold", invoiceId: saved.id }),
+          }).catch(() => {});
+        }
         const { generateExportPdf } = await import("@/lib/pdf-export");
         const pdf = generateExportPdf(saved.data);
         pdf.save(`${saved.invoiceNo.replace(/\//g, "_")}.pdf`);
@@ -318,24 +359,42 @@ export default function ExportInvoicePage() {
       </div>
 
       {/* KPI Cards */}
+      {listLoading ? <KpiSkeleton /> : (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><FileText size={20} /></div>
-          <div><p className="text-xs text-gray-500">Total Invoices</p><p className="text-xl font-bold">{kpis.total}</p></div>
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><FileText size={18} /></div>
+            <Sparkline data={kpis.sparkCount} color="#3b82f6" />
+          </div>
+          <p className="text-xl font-bold">{kpis.total}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600"><DollarSign size={20} /></div>
-          <div><p className="text-xs text-gray-500">Total Value</p><p className="text-xl font-bold">{fmtCurr(kpis.totalValue)}</p></div>
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center text-green-600"><DollarSign size={18} /></div>
+            <Sparkline data={kpis.sparkValue} color="#16a34a" />
+          </div>
+          <p className="text-xl font-bold">{fmtCurr(kpis.totalValue)}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Total Value</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600"><TrendingUp size={20} /></div>
-          <div><p className="text-xs text-gray-500">Avg Invoice</p><p className="text-xl font-bold">{fmtCurr(kpis.avg)}</p></div>
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600"><TrendingUp size={18} /></div>
+            <Sparkline data={kpis.sparkValue} color="#9333ea" />
+          </div>
+          <p className="text-xl font-bold">{fmtCurr(kpis.avg)}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Avg Invoice</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><CalendarDays size={20} /></div>
-          <div><p className="text-xs text-gray-500">This Month</p><p className="text-xl font-bold">{kpis.thisMonth}</p></div>
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><CalendarDays size={18} /></div>
+            <Sparkline data={kpis.sparkCount} color="#d97706" />
+          </div>
+          <p className="text-xl font-bold">{kpis.thisMonth}</p>
+          <p className="text-xs text-gray-500 mt-0.5">This Month</p>
         </div>
       </div>
+      )}
 
       {/* Invoice Table */}
       <div className="card">

@@ -13,6 +13,9 @@ import {
   Moon,
   Sun,
   BarChart3,
+  Settings,
+  StickyNote,
+  ClipboardList,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useAuth } from "./auth";
@@ -23,7 +26,10 @@ const navItems = [
   { href: "/create/domestic", label: "Domestic Invoice", icon: FilePlus },
   { href: "/create/export", label: "Export Invoice", icon: Globe },
   { href: "/invoices", label: "Invoice History", icon: FileText },
+  { href: "/memos", label: "Memo", icon: ClipboardList },
   { href: "/reports", label: "Reports", icon: BarChart3 },
+  { href: "/notes", label: "Notes", icon: StickyNote },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar({

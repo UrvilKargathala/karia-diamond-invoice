@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
+import { Sparkline, getMonthlyBuckets, getMonthlyValues } from "@/components/sparkline";
 import type { StoredInvoice } from "@/lib/types";
 
 export default function Dashboard() {
@@ -51,6 +52,10 @@ export default function Dashboard() {
       return d.getMonth() === lm && d.getFullYear() === ly;
     });
 
+    const allDates = invoices.map((i) => i.date);
+    const domesticDates = domestic.map((i) => i.date);
+    const exportDates = exports.map((i) => i.date);
+
     return {
       total: invoices.length,
       domestic: domestic.length,
@@ -61,6 +66,11 @@ export default function Dashboard() {
       lastMonth: lastMonth.length,
       thisMonthINR: thisMonth.filter((i) => i.type === "domestic").reduce((s, i) => s + i.totalAmount, 0),
       thisMonthUSD: thisMonth.filter((i) => i.type === "export").reduce((s, i) => s + i.totalAmount, 0),
+      sparkAll: getMonthlyBuckets(allDates),
+      sparkDomestic: getMonthlyBuckets(domesticDates),
+      sparkExport: getMonthlyBuckets(exportDates),
+      sparkINR: getMonthlyValues(domestic.map((i) => ({ date: i.date, amount: i.totalAmount }))),
+      sparkUSD: getMonthlyValues(exports.map((i) => ({ date: i.date, amount: i.totalAmount }))),
     };
   }, [invoices]);
 
@@ -121,13 +131,18 @@ export default function Dashboard() {
             <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
               <FileText size={18} className="text-blue-600 dark:text-blue-400" />
             </div>
+            <Sparkline data={stats.sparkAll} color="#3b82f6" />
+          </div>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-2xl font-bold">{stats.total}</p>
+              <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
+            </div>
             <div className="flex items-center gap-1 text-xs font-medium text-green-600">
               {trend === "up" ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
               {trendDiff} vs last mo
             </div>
           </div>
-          <p className="text-2xl font-bold">{stats.total}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
         </div>
 
         <div className="card">
@@ -135,6 +150,7 @@ export default function Dashboard() {
             <div className="w-9 h-9 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
               <FilePlus size={18} className="text-green-600 dark:text-green-400" />
             </div>
+            <Sparkline data={stats.sparkDomestic} color="#16a34a" />
           </div>
           <p className="text-2xl font-bold">{stats.domestic}</p>
           <p className="text-xs text-gray-500 mt-0.5">Domestic Invoices</p>
@@ -145,6 +161,7 @@ export default function Dashboard() {
             <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
               <Globe size={18} className="text-purple-600 dark:text-purple-400" />
             </div>
+            <Sparkline data={stats.sparkExport} color="#9333ea" />
           </div>
           <p className="text-2xl font-bold">{stats.export}</p>
           <p className="text-xs text-gray-500 mt-0.5">Export Invoices</p>
@@ -155,6 +172,7 @@ export default function Dashboard() {
             <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
               <CalendarDays size={18} className="text-amber-600 dark:text-amber-400" />
             </div>
+            <Sparkline data={stats.sparkAll} color="#d97706" />
           </div>
           <p className="text-2xl font-bold">{stats.thisMonth}</p>
           <p className="text-xs text-gray-500 mt-0.5">This Month</p>
@@ -165,9 +183,12 @@ export default function Dashboard() {
       {/* Revenue Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="card bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-[var(--color-surface)] border-blue-100 dark:border-blue-800/30">
-          <div className="flex items-center gap-2 mb-2">
-            <IndianRupee size={16} className="text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Domestic Revenue</span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <IndianRupee size={16} className="text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Domestic Revenue</span>
+            </div>
+            <Sparkline data={stats.sparkINR} color="#2563eb" width={80} height={28} />
           </div>
           <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
             {loading ? "-" : `₹ ${stats.totalINR.toLocaleString("en-IN")}`}
@@ -178,9 +199,12 @@ export default function Dashboard() {
         </div>
 
         <div className="card bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-[var(--color-surface)] border-purple-100 dark:border-purple-800/30">
-          <div className="flex items-center gap-2 mb-2">
-            <DollarSign size={16} className="text-purple-600 dark:text-purple-400" />
-            <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Export Revenue</span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <DollarSign size={16} className="text-purple-600 dark:text-purple-400" />
+              <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Export Revenue</span>
+            </div>
+            <Sparkline data={stats.sparkUSD} color="#9333ea" width={80} height={28} />
           </div>
           <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
             {loading ? "-" : `$ ${stats.totalUSD.toLocaleString("en-US")}`}

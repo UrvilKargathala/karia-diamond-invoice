@@ -10,7 +10,8 @@ import {
   FileText,
 } from "lucide-react";
 import { useToast } from "@/components/toast";
-import { TableSkeleton } from "@/components/skeleton";
+import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
+import { Sparkline, getMonthlyBuckets, getMonthlyValues } from "@/components/sparkline";
 import type { StoredInvoice } from "@/lib/types";
 
 type Period = "monthly" | "yearly";
@@ -117,6 +118,16 @@ export default function ReportsPage() {
     exportTotal: summaries.reduce((s, r) => s + r.exportTotal, 0),
   }), [summaries]);
 
+  const sparkData = useMemo(() => {
+    const domestic = invoices.filter((i) => i.type === "domestic");
+    const exports = invoices.filter((i) => i.type === "export");
+    return {
+      count: getMonthlyBuckets(invoices.map((i) => i.date)),
+      inr: getMonthlyValues(domestic.map((i) => ({ date: i.date, amount: i.totalAmount }))),
+      usd: getMonthlyValues(exports.map((i) => ({ date: i.date, amount: i.totalAmount }))),
+    };
+  }, [invoices]);
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -169,39 +180,40 @@ export default function ReportsPage() {
       </div>
 
       {/* Summary Cards */}
+      {loading ? <KpiSkeleton cols={3} /> : (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-            <FileText size={20} className="text-blue-600 dark:text-blue-400" />
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+              <FileText size={18} className="text-blue-600 dark:text-blue-400" />
+            </div>
+            <Sparkline data={sparkData.count} color="#3b82f6" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Total Invoices</p>
-            <p className="text-xl font-bold">{loading ? "-" : totals.count}</p>
-          </div>
+          <p className="text-xl font-bold">{totals.count}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
-            <IndianRupee size={20} className="text-green-600 dark:text-green-400" />
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
+              <IndianRupee size={18} className="text-green-600 dark:text-green-400" />
+            </div>
+            <Sparkline data={sparkData.inr} color="#16a34a" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Domestic Revenue</p>
-            <p className="text-xl font-bold">
-              {loading ? "-" : `₹ ${totals.domesticTotal.toLocaleString("en-IN")}`}
-            </p>
-          </div>
+          <p className="text-xl font-bold">₹ {totals.domesticTotal.toLocaleString("en-IN")}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Domestic Revenue</p>
         </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
-            <DollarSign size={20} className="text-purple-600 dark:text-purple-400" />
+        <div className="card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
+              <DollarSign size={18} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <Sparkline data={sparkData.usd} color="#9333ea" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Export Revenue</p>
-            <p className="text-xl font-bold">
-              {loading ? "-" : `$ ${totals.exportTotal.toLocaleString("en-US")}`}
-            </p>
-          </div>
+          <p className="text-xl font-bold">$ {totals.exportTotal.toLocaleString("en-US")}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Export Revenue</p>
         </div>
       </div>
+      )}
 
       {/* Table */}
       <div className="card">
