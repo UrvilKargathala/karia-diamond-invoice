@@ -44,6 +44,11 @@ export default function InvoiceHistoryPage() {
   };
 
   useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setSearch(q);
+  }, []);
+
+  useEffect(() => {
     fetchInvoices();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -130,9 +135,9 @@ export default function InvoiceHistoryPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Invoice History</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Invoice History</h1>
           <p className="text-sm text-gray-500 mt-1">
             {filtered.length} invoice{filtered.length !== 1 ? "s" : ""}{" "}
             {filtered.length !== invoices.length &&
@@ -158,61 +163,50 @@ export default function InvoiceHistoryPage() {
       </div>
 
       {/* Filters */}
-      <div className="card mb-4">
-        <div className="flex flex-wrap gap-4 items-end">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              type="text"
-              className="form-input pl-9"
-              placeholder="Search by invoice number or buyer..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      <div className="card mb-4 space-y-3">
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            className="form-input"
+            style={{ paddingLeft: 36 }}
+            placeholder="Search by invoice number or buyer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap gap-3 items-center justify-between">
+          <div className="flex gap-2">
+            {(["all", "domestic", "export"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                  typeFilter === t ? "bg-[color:var(--color-primary)] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
           </div>
-          <select
-            className="form-input w-36"
-            value={typeFilter}
-            onChange={(e) =>
-              setTypeFilter(e.target.value as "all" | "domestic" | "export")
-            }
-          >
-            <option value="all">All Types</option>
-            <option value="domestic">Domestic</option>
-            <option value="export">Export</option>
-          </select>
-          <div>
-            <label className="form-label">From</label>
-            <input
-              type="date"
-              className="form-input w-36"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-            />
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <input type="date" className="form-input" style={{ width: 150 }} aria-label="From date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+            <span>to</span>
+            <input type="date" className="form-input" style={{ width: 150 }} aria-label="To date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+            {(dateFrom || dateTo || search || typeFilter !== "all") && (
+              <button
+                onClick={() => {
+                  setDateFrom("");
+                  setDateTo("");
+                  setSearch("");
+                  setTypeFilter("all");
+                }}
+                className="btn btn-outline text-xs"
+              >
+                Clear
+              </button>
+            )}
           </div>
-          <div>
-            <label className="form-label">To</label>
-            <input
-              type="date"
-              className="form-input w-36"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-            />
-          </div>
-          {(dateFrom || dateTo) && (
-            <button
-              onClick={() => {
-                setDateFrom("");
-                setDateTo("");
-              }}
-              className="btn btn-outline text-xs"
-            >
-              Clear dates
-            </button>
-          )}
         </div>
       </div>
 
@@ -229,7 +223,7 @@ export default function InvoiceHistoryPage() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm data-table">
                 <thead>
                   <tr className="text-left text-gray-500 border-b">
                     <th className="pb-2 font-medium">Invoice No.</th>
@@ -243,7 +237,7 @@ export default function InvoiceHistoryPage() {
                 <tbody>
                   {paginated.map((inv) => (
                     <tr key={inv.id} className="border-b last:border-0">
-                      <td className="py-3 font-mono text-xs">
+                      <td className="py-3 font-semibold text-[13px] tabular-nums whitespace-nowrap">
                         {inv.invoiceNo}
                       </td>
                       <td className="py-3">

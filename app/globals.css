@@ -3,17 +3,21 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --color-primary: #1a1a2e;
-  --color-accent: #0f3460;
+  --color-primary: #2563eb;
+  --color-accent: #2563eb;
   --color-surface: #ffffff;
-  --color-surface-alt: #f8f9fa;
-  --color-border: #e2e8f0;
+  --color-surface-alt: #f4f6fb;
+  --color-border: #e8ecf3;
   --color-text: #1a202c;
   --color-text-muted: #718096;
   --color-success: #38a169;
   --color-warning: #dd6b20;
   --color-danger: #e53e3e;
   --font-sans: var(--font-nunito-sans);
+}
+
+*, ::after, ::before {
+  border-color: var(--color-border);
 }
 
 body {
@@ -31,7 +35,7 @@ input, select, textarea {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 14px;
   transition: border-color 0.2s;
   background: var(--color-surface);
@@ -41,7 +45,11 @@ input, select, textarea {
 .form-input:focus {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.form-input.pl-9 {
+  padding-left: 36px;
 }
 
 .form-label {
@@ -59,7 +67,7 @@ input, select, textarea {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -73,7 +81,7 @@ input, select, textarea {
 }
 
 .btn-primary:hover {
-  background: #2d2d4e;
+  background: #1d4ed8;
 }
 
 .btn-outline {
@@ -98,27 +106,56 @@ input, select, textarea {
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 24px;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+}
+
+/* Data tables (list pages) */
+.data-table thead th {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  padding: 0 12px 12px;
+  white-space: nowrap;
+}
+.data-table tbody td,
+.data-table tfoot td {
+  padding: 14px 12px;
+}
+.data-table tbody tr {
+  transition: background-color 0.15s;
+}
+.data-table tbody tr:hover {
+  background: var(--color-surface-alt);
+}
+.data-table td button {
+  padding: 8px;
+}
+.data-table td button svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Dark mode */
 html.dark {
-  --color-primary: #2d2d4e;
-  --color-accent: #4a6fa5;
-  --color-surface: #1e1e2e;
-  --color-surface-alt: #141420;
-  --color-border: #2e2e42;
+  --color-primary: #3b6fe0;
+  --color-accent: #5b8def;
+  --color-surface: #191b26;
+  --color-surface-alt: #10121a;
+  --color-border: #272a3a;
   --color-text: #e2e8f0;
   --color-text-muted: #a0aec0;
 }
 
 html.dark .btn-primary {
-  background: #4a6fa5;
+  background: #3b6fe0;
 }
 
 html.dark .btn-primary:hover {
-  background: #5a7fb5;
+  background: #4f82f0;
 }
 
 html.dark .form-input:focus {

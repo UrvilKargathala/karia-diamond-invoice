@@ -129,11 +129,9 @@ export default function NotesPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <StickyNote size={24} /> Notes
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Notes</h1>
           <p className="text-sm text-gray-500 mt-1">Internal notes and reminders</p>
         </div>
         <button onClick={openNew} className="btn btn-primary">
@@ -142,7 +140,7 @@ export default function NotesPage() {
       </div>
 
       {/* Search */}
-      <div className="relative mb-6 max-w-md">
+      <div className="relative mb-6 max-w-xl">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
@@ -164,7 +162,7 @@ export default function NotesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
           {filtered.map((note) => {
             const isExpanded = expanded.has(note.id);
             const isLong = note.content.length > 220;

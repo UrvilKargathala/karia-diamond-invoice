@@ -3,12 +3,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ClipboardList,
   Plus,
   Pencil,
   Trash2,
   ArrowRightLeft,
   Undo2,
+  Eye,
+  Download,
 } from "lucide-react";
 import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
@@ -149,6 +150,20 @@ export default function MemosPage() {
     }
   };
 
+  const memoPdf = async (memo: ConsignmentMemo) => {
+    const { generateMemoPdf } = await import("@/lib/pdf-memo");
+    return generateMemoPdf(memo);
+  };
+
+  const handlePreview = async (memo: ConsignmentMemo) => {
+    const pdf = await memoPdf(memo);
+    window.open(pdf.output("bloburl") as unknown as string, "_blank");
+  };
+
+  const handleDownload = async (memo: ConsignmentMemo) => {
+    (await memoPdf(memo)).save(`${memo.memoNo.replace(/\//g, "_")}.pdf`);
+  };
+
   const handleConvert = (memo: ConsignmentMemo) => {
     router.push(`/create/${memo.type}?fromMemo=${memo.id}`);
   };
@@ -192,11 +207,9 @@ export default function MemosPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <ClipboardList size={24} /> Memo
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Memo</h1>
           <p className="text-sm text-gray-500 mt-1">
             Goods sent on approval — pending, sold, or returned
           </p>
@@ -204,6 +217,24 @@ export default function MemosPage() {
         <button onClick={openNew} className="btn btn-primary">
           <Plus size={14} /> New Memo
         </button>
+      </div>
+
+      {/* Status summary */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {(["pending", "sold", "returned"] as const).map((st) => {
+          const list = memos.filter((m) => m.status === st);
+          const inr = list.filter((m) => m.type === "domestic").reduce((a, m) => a + m.totalAmount, 0);
+          const usd = list.filter((m) => m.type === "export").reduce((a, m) => a + m.totalAmount, 0);
+          return (
+            <div key={st} className="card">
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusStyles[st]}`}>{st}</span>
+              <p className="text-2xl font-bold mt-3">{loading ? "-" : list.length}</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {loading ? "" : `₹ ${inr.toLocaleString("en-IN")}${usd ? ` · $ ${usd.toLocaleString("en-US")}` : ""}`}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Status filter tabs */}
@@ -214,7 +245,7 @@ export default function MemosPage() {
             onClick={() => setStatusFilter(s)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
               statusFilter === s
-                ? "bg-[#1a1a2e] text-white"
+                ? "bg-[color:var(--color-primary)] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
@@ -233,7 +264,7 @@ export default function MemosPage() {
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm data-table">
               <thead>
                 <tr className="text-left text-gray-500 border-b">
                   <th className="pb-2 font-medium">Memo No.</th>
@@ -247,7 +278,7 @@ export default function MemosPage() {
               <tbody>
                 {filtered.map((memo) => (
                   <tr key={memo.id} className="border-b last:border-0">
-                    <td className="py-3 font-mono text-xs">{memo.memoNo}</td>
+                    <td className="py-3 font-semibold text-[13px] tabular-nums whitespace-nowrap">{memo.memoNo}</td>
                     <td className="py-3">{memo.buyer.name}</td>
                     <td className="py-3 text-gray-500">{fmtDate(memo.date)}</td>
                     <td className="py-3">
@@ -258,6 +289,12 @@ export default function MemosPage() {
                     <td className="py-3 text-right font-medium">{fmtAmount(memo)}</td>
                     <td className="py-3 text-right">
                       <div className="flex gap-0.5 justify-end">
+                        <button onClick={() => handlePreview(memo)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded hover:bg-indigo-50" title="Preview PDF">
+                          <Eye size={14} />
+                        </button>
+                        <button onClick={() => handleDownload(memo)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50" title="Download PDF">
+                          <Download size={14} />
+                        </button>
                         {memo.status === "pending" && (
                           <>
                             <button onClick={() => handleConvert(memo)} className="p-1.5 text-gray-400 hover:text-green-600 rounded hover:bg-green-50" title="Convert to Invoice">

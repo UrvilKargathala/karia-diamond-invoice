@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
-  BarChart3,
   Download,
   CalendarDays,
   IndianRupee,
@@ -11,7 +10,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
-import { Sparkline, getMonthlyBuckets, getMonthlyValues } from "@/components/sparkline";
+import { KpiCard, ChartCard } from "@/components/ui";
+import { TrendArea, HighlightBars } from "@/components/charts";
 import type { StoredInvoice } from "@/lib/types";
 
 type Period = "monthly" | "yearly";
@@ -118,23 +118,17 @@ export default function ReportsPage() {
     exportTotal: summaries.reduce((s, r) => s + r.exportTotal, 0),
   }), [summaries]);
 
-  const sparkData = useMemo(() => {
-    const domestic = invoices.filter((i) => i.type === "domestic");
-    const exports = invoices.filter((i) => i.type === "export");
-    return {
-      count: getMonthlyBuckets(invoices.map((i) => i.date)),
-      inr: getMonthlyValues(domestic.map((i) => ({ date: i.date, amount: i.totalAmount }))),
-      usd: getMonthlyValues(exports.map((i) => ({ date: i.date, amount: i.totalAmount }))),
-    };
-  }, [invoices]);
+  // oldest -> newest, short labels
+  const chartRows = useMemo(
+    () => (period === "yearly" ? [...summaries].reverse() : summaries).map((r) => ({ ...r, label: period === "monthly" ? r.label.slice(0, 3) : r.label })),
+    [summaries, period]
+  );
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <BarChart3 size={24} /> Reports
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
           <p className="text-sm text-gray-500 mt-1">
             Date-wise invoice summaries
           </p>
@@ -181,38 +175,21 @@ export default function ReportsPage() {
 
       {/* Summary Cards */}
       {loading ? <KpiSkeleton cols={3} /> : (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-              <FileText size={18} className="text-blue-600 dark:text-blue-400" />
-            </div>
-            <Sparkline data={sparkData.count} color="#3b82f6" />
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <KpiCard label="Total Invoices" value={totals.count} icon={<FileText size={16} />} tint="bg-blue-50 text-blue-600 dark:bg-blue-500/15" sub={period === "monthly" ? String(year) : "All years"} />
+            <KpiCard label="Domestic Revenue" value={`₹ ${totals.domesticTotal.toLocaleString("en-IN")}`} icon={<IndianRupee size={16} />} tint="bg-green-50 text-green-600 dark:bg-green-500/15" />
+            <KpiCard label="Export Revenue" value={`$ ${totals.exportTotal.toLocaleString("en-US")}`} icon={<DollarSign size={16} />} tint="bg-purple-50 text-purple-600 dark:bg-purple-500/15" />
           </div>
-          <p className="text-xl font-bold">{totals.count}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-9 h-9 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
-              <IndianRupee size={18} className="text-green-600 dark:text-green-400" />
-            </div>
-            <Sparkline data={sparkData.inr} color="#16a34a" />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
+            <ChartCard title="Domestic Revenue" sub="₹ per period">
+              <TrendArea data={chartRows.map((r) => ({ label: r.label, value: r.domesticTotal }))} color="#2563eb" height={220} />
+            </ChartCard>
+            <ChartCard title="Export Revenue" sub="$ per period">
+              <HighlightBars data={chartRows.map((r) => ({ label: r.label, value: r.exportTotal }))} color="#9333ea" height={220} />
+            </ChartCard>
           </div>
-          <p className="text-xl font-bold">₹ {totals.domesticTotal.toLocaleString("en-IN")}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Domestic Revenue</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
-              <DollarSign size={18} className="text-purple-600 dark:text-purple-400" />
-            </div>
-            <Sparkline data={sparkData.usd} color="#9333ea" />
-          </div>
-          <p className="text-xl font-bold">$ {totals.exportTotal.toLocaleString("en-US")}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Export Revenue</p>
-        </div>
-      </div>
+        </>
       )}
 
       {/* Table */}
@@ -228,7 +205,7 @@ export default function ReportsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm data-table">
               <thead>
                 <tr className="text-left text-gray-500 border-b">
                   <th className="pb-2 font-medium">{period === "monthly" ? "Month" : "Year"}</th>

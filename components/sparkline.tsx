@@ -67,3 +67,37 @@ export function getMonthlyValues(
   }
   return buckets;
 }
+
+export function getMonthLabels(months = 6): string[] {
+  const now = new Date();
+  return Array.from({ length: months }, (_, i) =>
+    new Date(now.getFullYear(), now.getMonth() - (months - 1 - i), 1).toLocaleString("en-IN", { month: "short" }),
+  );
+}
+
+// Plain CSS bar chart: value on top of each bar, month label below.
+export function BarChart({
+  data,
+  color,
+  format = (n: number) => (n >= 1000 ? `${+(n / 1000).toFixed(1)}k` : String(n)),
+  height = 90,
+}: {
+  data: number[];
+  color: string;
+  format?: (n: number) => string;
+  height?: number;
+}) {
+  const labels = getMonthLabels(data.length);
+  const max = Math.max(...data, 1);
+  return (
+    <div className="flex items-end gap-1.5 mt-3" style={{ height }}>
+      {data.map((v, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center justify-end h-full min-w-0" title={`${labels[i]}: ${v.toLocaleString("en-IN")}`}>
+          <span className="text-[9px] text-gray-500 leading-none mb-0.5">{v ? format(v) : ""}</span>
+          <div className="w-full rounded-t" style={{ height: `${(v / max) * 60}%`, minHeight: v ? 3 : 1, background: color, opacity: v ? 1 : 0.2 }} />
+          <span className="text-[9px] text-gray-400 leading-none mt-1">{labels[i]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -28,7 +28,7 @@ export function SlideOver({
       )}
       <div
         className={clsx(
-          "fixed top-0 right-0 h-full w-full max-w-3xl bg-white z-50 shadow-2xl transition-transform duration-300 flex flex-col",
+          "fixed top-0 right-0 h-full w-full max-w-3xl lg:max-w-4xl bg-white z-50 shadow-2xl transition-transform duration-300 flex flex-col",
           open ? "translate-x-0" : "translate-x-full"
         )}
       >

@@ -17,7 +17,7 @@ export function LoginScreen() {
   return (
     <div className="fixed inset-0 flex z-50">
       {/* Left branding panel */}
-      <div className="hidden md:flex w-1/2 bg-[#1a1a2e] text-white flex-col items-center justify-center relative overflow-hidden">
+      <div className="hidden md:flex w-1/2 bg-[color:var(--color-primary)] text-white flex-col items-center justify-center relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-[10%] left-[15%] w-64 h-64 border border-white/30 rotate-45" />
@@ -47,7 +47,7 @@ export function LoginScreen() {
         <div className="w-full max-w-sm">
           {/* Mobile-only branding */}
           <div className="md:hidden text-center mb-8">
-            <div className="w-14 h-14 bg-[#1a1a2e] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <span className="text-white font-bold text-lg">KD</span>
             </div>
             <h1 className="text-2xl font-bold">Karia Diamond</h1>

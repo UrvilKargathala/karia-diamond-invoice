@@ -20,7 +20,9 @@ import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
 import { useToast } from "@/components/toast";
 import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
-import { Sparkline, getMonthlyBuckets, getMonthlyValues } from "@/components/sparkline";
+import { KpiCard, Delta, ChartCard } from "@/components/ui";
+import { TrendArea, HighlightBars } from "@/components/charts";
+import { getMonthlyBuckets, getMonthlyValues, getMonthLabels } from "@/components/sparkline";
 import { KARIA_INDIA, GST_RATES, HSN_CODES } from "@/lib/constants";
 import type {
   DomesticInvoiceData,
@@ -353,9 +355,9 @@ export default function DomesticInvoicePage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Domestic Invoices</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Domestic Invoices</h1>
           <p className="text-sm text-gray-500 mt-1">
             GST Tax Invoice - Karia India LLP
           </p>
@@ -368,48 +370,22 @@ export default function DomesticInvoicePage() {
 
       {/* KPI Cards */}
       {listLoading ? <KpiSkeleton /> : (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-              <FileText size={18} />
-            </div>
-            <Sparkline data={kpis.sparkCount} color="#3b82f6" />
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+            <KpiCard label="Total Invoices" value={kpis.total} icon={<FileText size={16} />} tint="bg-blue-50 text-blue-600 dark:bg-blue-500/15" delta={<Delta current={kpis.sparkCount[5]} previous={kpis.sparkCount[4]} />} sub="vs last month" />
+            <KpiCard label="Total Value" value={fmtINR(kpis.totalValue)} icon={<IndianRupee size={16} />} tint="bg-green-50 text-green-600 dark:bg-green-500/15" delta={<Delta current={kpis.sparkValue[5]} previous={kpis.sparkValue[4]} />} sub="vs last month" />
+            <KpiCard label="Avg Invoice" value={fmtINR(kpis.avg)} icon={<TrendingUp size={16} />} tint="bg-purple-50 text-purple-600 dark:bg-purple-500/15" />
+            <KpiCard label="This Month" value={kpis.thisMonth} icon={<CalendarDays size={16} />} tint="bg-amber-50 text-amber-600 dark:bg-amber-500/15" />
           </div>
-          <p className="text-xl font-bold">{kpis.total}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Total Invoices</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
-              <IndianRupee size={18} />
-            </div>
-            <Sparkline data={kpis.sparkValue} color="#16a34a" />
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
+            <ChartCard className="xl:col-span-2" title="Value per Month" sub="Last 6 months">
+              <TrendArea data={getMonthLabels(6).map((label, i) => ({ label, value: kpis.sparkValue[i] }))} color="#2563eb" height={220} format={fmtINR} />
+            </ChartCard>
+            <ChartCard title="Invoices per Month" sub="Last 6 months">
+              <HighlightBars data={getMonthLabels(6).map((label, i) => ({ label, value: kpis.sparkCount[i] }))} color="#2563eb" height={220} />
+            </ChartCard>
           </div>
-          <p className="text-xl font-bold">{fmtINR(kpis.totalValue)}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Total Value</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
-              <TrendingUp size={18} />
-            </div>
-            <Sparkline data={kpis.sparkValue} color="#9333ea" />
-          </div>
-          <p className="text-xl font-bold">{fmtINR(kpis.avg)}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Avg Invoice</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-              <CalendarDays size={18} />
-            </div>
-            <Sparkline data={kpis.sparkCount} color="#d97706" />
-          </div>
-          <p className="text-xl font-bold">{kpis.thisMonth}</p>
-          <p className="text-xs text-gray-500 mt-0.5">This Month</p>
-        </div>
-      </div>
+        </>
       )}
 
       {/* Invoice Table */}
@@ -422,7 +398,7 @@ export default function DomesticInvoicePage() {
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm data-table">
               <thead>
                 <tr className="text-left text-gray-500 border-b">
                   <th className="pb-2 font-medium">Invoice No.</th>
@@ -435,7 +411,7 @@ export default function DomesticInvoicePage() {
               <tbody>
                 {invoices.map((inv) => (
                   <tr key={inv.id} className="border-b last:border-0">
-                    <td className="py-3 font-mono text-xs">{inv.invoiceNo}</td>
+                    <td className="py-3 font-semibold text-[13px] tabular-nums whitespace-nowrap">{inv.invoiceNo}</td>
                     <td className="py-3">{inv.buyerName}</td>
                     <td className="py-3 text-gray-500">
                       {new Date(inv.date).toLocaleDateString("en-IN", {
@@ -473,7 +449,7 @@ export default function DomesticInvoicePage() {
         {/* Invoice Details */}
         <div className="mb-6">
           <h3 className="font-semibold mb-3">Invoice Details</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="form-label">Invoice No. (auto if blank)</label>
               <input type="text" className="form-input" value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} placeholder="Auto-generated" />
@@ -500,7 +476,7 @@ export default function DomesticInvoicePage() {
         {/* Buyer Details */}
         <div className="mb-6">
           <h3 className="font-semibold mb-3">Buyer Details</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
               <label className="form-label">Company Name *</label>
               <input type="text" className="form-input" value={buyer.name} onChange={(e) => setBuyer({ ...buyer, name: e.target.value })} placeholder="Buyer company name" />

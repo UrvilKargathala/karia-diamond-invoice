@@ -76,9 +76,9 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Settings</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
           <p className="text-sm text-gray-500 mt-1">
             Company details, bank info & tax defaults
           </p>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
       </div>
 
       {loading ? <SettingsSkeleton /> : (
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         {/* Domestic Seller */}
         <CompanySection
           title="Domestic Seller (Karia India LLP)"
@@ -112,6 +112,7 @@ export default function SettingsPage() {
           ]}
         />
 
+        <div className="space-y-4">
         {/* Default Consignee */}
         <CompanySection
           title="Default Export Consignee"
@@ -218,8 +219,10 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        </div>
+
         {/* HSN Codes */}
-        <div className="card">
+        <div className="card xl:col-span-2">
           <div className="flex items-center gap-2 mb-4">
             <Landmark size={18} className="text-blue-600" />
             <h2 className="font-semibold">HSN Codes</h2>
