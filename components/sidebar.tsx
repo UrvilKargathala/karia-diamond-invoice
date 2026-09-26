@@ -64,12 +64,12 @@ export function Sidebar({
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
-      <div className="px-5 h-16 flex items-center justify-between shrink-0">
-        <Link href="/" className="flex items-center gap-3" onClick={onNavigate}>
+      <div className="px-4 h-16 flex items-center justify-between shrink-0">
+        <Link href="/" className="flex items-center gap-2.5" onClick={onNavigate}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-10 h-10 rounded-xl object-cover shrink-0" />
+          <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-9 h-9 rounded-lg object-cover shrink-0" />
           <div>
-            <div className="font-bold text-sm tracking-wide leading-tight">KARIA DIAMOND LLP</div>
+            <div className="font-bold text-[13px] whitespace-nowrap leading-tight">KARIA DIAMOND LLP</div>
             <div className="text-[10px] text-gray-400 font-medium">Invoice Generator</div>
           </div>
         </Link>
