@@ -26,10 +26,10 @@ export function LoginScreen() {
         </div>
 
         <div className="relative z-10 text-center px-12">
-          <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-white/10">
-            <span className="text-3xl font-bold">KD</span>
+          <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden border border-white/10">
+            <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-3xl font-bold tracking-wide mb-3">KARIA DIAMOND</h1>
+          <h1 className="text-3xl font-bold tracking-wide mb-3">KARIA DIAMOND LLP</h1>
           <p className="text-white/50 text-sm mb-8">Invoice Generator</p>
           <div className="w-16 h-px bg-white/20 mx-auto mb-8" />
           <p className="text-white/40 text-sm max-w-xs leading-relaxed">
@@ -47,10 +47,10 @@ export function LoginScreen() {
         <div className="w-full max-w-sm">
           {/* Mobile-only branding */}
           <div className="md:hidden text-center mb-8">
-            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-lg">KD</span>
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden border border-gray-200">
+              <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-2xl font-bold">Karia Diamond</h1>
+            <h1 className="text-2xl font-bold">Karia Diamond LLP</h1>
             <p className="text-sm text-gray-500 mt-1">Invoice Generator</p>
           </div>
 

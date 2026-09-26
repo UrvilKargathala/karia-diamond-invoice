@@ -7,7 +7,6 @@ import {
   FilePlus,
   FileText,
   Globe,
-  Home as HomeIcon,
   X,
   LogOut,
   Moon,
@@ -67,11 +66,11 @@ export function Sidebar({
     >
       <div className="px-5 h-16 flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center gap-3" onClick={onNavigate}>
-          <div className="w-9 h-9 bg-[color:var(--color-primary)] rounded-xl flex items-center justify-center shadow-md shadow-blue-500/25">
-            <HomeIcon size={16} className="text-white" />
+          <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-md shadow-blue-500/25 bg-white">
+            <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-full h-full object-cover" />
           </div>
           <div>
-            <div className="font-bold text-sm tracking-wide leading-tight">KARIA DIAMOND</div>
+            <div className="font-bold text-sm tracking-wide leading-tight">KARIA DIAMOND LLP</div>
             <div className="text-[10px] text-gray-400 font-medium">Invoice Generator</div>
           </div>
         </Link>
