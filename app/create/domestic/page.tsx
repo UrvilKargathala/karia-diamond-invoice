@@ -20,6 +20,7 @@ import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
 import { useToast } from "@/components/toast";
 import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
+import { LogoField } from "@/components/logo-field";
 import { KpiCard, Delta, ChartCard } from "@/components/ui";
 import { TrendArea, HighlightBars } from "@/components/charts";
 import { getMonthlyBuckets, getMonthlyValues, getMonthLabels } from "@/components/sparkline";
@@ -65,6 +66,7 @@ export default function DomesticInvoicePage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [invoiceNo, setInvoiceNo] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [logo, setLogo] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("15 Days");
   const [dispatchedThrough, setDispatchedThrough] = useState("Hand to Hand");
   const [destination, setDestination] = useState("Surat");
@@ -137,6 +139,7 @@ export default function DomesticInvoicePage() {
     setInvoiceNo("");
     setDate(new Date().toISOString().slice(0, 10));
     setPaymentTerms("15 Days");
+    setLogo("");
     setDispatchedThrough("Hand to Hand");
     setDestination("Surat");
     setBuyer({ ...emptyBuyer });
@@ -162,6 +165,7 @@ export default function DomesticInvoicePage() {
         setInvoiceNo(isEdit ? d.invoiceNo : "");
         setDate(d.date);
         setPaymentTerms(d.paymentTerms);
+        setLogo(d.logo || "");
         setDispatchedThrough(d.dispatchedThrough);
         setDestination(d.destination);
         setBuyer(d.buyer);
@@ -238,6 +242,7 @@ export default function DomesticInvoicePage() {
   const grandTotal = Math.round(subtotal + taxTotal);
 
   const buildData = (): DomesticInvoiceData => ({
+    logo: logo || undefined,
     invoiceNo,
     date,
     paymentTerms,
@@ -470,6 +475,7 @@ export default function DomesticInvoicePage() {
               <label className="form-label">Destination</label>
               <input type="text" className="form-input" value={destination} onChange={(e) => setDestination(e.target.value)} />
             </div>
+            <LogoField value={logo} onChange={setLogo} />
           </div>
         </div>
 

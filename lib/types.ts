@@ -33,6 +33,7 @@ export interface DomesticLineItem {
 }
 
 export interface DomesticInvoiceData {
+  logo?: string; // custom logo data URL; default logo when empty
   invoiceNo: string;
   date: string;
   deliveryNote?: string;
@@ -90,6 +91,7 @@ export interface ShippingDetails {
 }
 
 export interface ExportInvoiceData {
+  logo?: string;
   invoiceNo: string;
   date: string;
   exporterRef: string;

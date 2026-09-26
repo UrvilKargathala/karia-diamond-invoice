@@ -20,6 +20,7 @@ import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
 import { useToast } from "@/components/toast";
 import { TableSkeleton, KpiSkeleton } from "@/components/skeleton";
+import { LogoField } from "@/components/logo-field";
 import { KpiCard, Delta, ChartCard } from "@/components/ui";
 import { TrendArea, HighlightBars } from "@/components/charts";
 import { getMonthlyBuckets, getMonthlyValues, getMonthLabels } from "@/components/sparkline";
@@ -75,6 +76,7 @@ export default function ExportInvoicePage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [invoiceNo, setInvoiceNo] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [logo, setLogo] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("Advance");
   const [lutArnNo, setLutArnNo] = useState("AD2403260556888R");
   const [lutArnDate, setLutArnDate] = useState("28-03-2026");
@@ -170,6 +172,7 @@ export default function ExportInvoicePage() {
     setInvoiceNo("");
     setDate(new Date().toISOString().slice(0, 10));
     setPaymentTerms("Advance");
+    setLogo("");
     setLutArnNo("AD2403260556888R");
     setLutArnDate("28-03-2026");
     setCurrency("USD");
@@ -199,6 +202,7 @@ export default function ExportInvoicePage() {
         setInvoiceNo(isEdit ? d.invoiceNo : "");
         setDate(d.date);
         setPaymentTerms(d.paymentTerms);
+        setLogo(d.logo || "");
         setLutArnNo(d.lutArnNo || "");
         setLutArnDate(d.lutArnDate || "");
         setCurrency((d as ExportInvoiceData & { currency?: string }).currency || "USD");
@@ -272,7 +276,7 @@ export default function ExportInvoicePage() {
   const currSymbol = currency === "USD" ? "US$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : currency === "AED" ? "AED" : currency === "HKD" ? "HK$" : currency;
 
   const buildData = (): ExportInvoiceData => ({
-    invoiceNo, date, exporterRef: BRILLIANT_LABGROWN.iecNo || "", exporter: BRILLIANT_LABGROWN,
+    logo: logo || undefined, invoiceNo, date, exporterRef: BRILLIANT_LABGROWN.iecNo || "", exporter: BRILLIANT_LABGROWN,
     consignee, shipping, paymentTerms, items, packingList, shippingCharges, lutArnNo, lutArnDate,
     currency,
   } as ExportInvoiceData);
@@ -433,6 +437,7 @@ export default function ExportInvoicePage() {
             <div><label className="form-label">Payment Terms</label><input type="text" className="form-input" value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} /></div>
             <div><label className="form-label">LUT/ARN No.</label><input type="text" className="form-input" value={lutArnNo} onChange={(e) => setLutArnNo(e.target.value)} /></div>
             <div><label className="form-label">LUT/ARN Date</label><input type="text" className="form-input" value={lutArnDate} onChange={(e) => setLutArnDate(e.target.value)} /></div>
+            <LogoField value={logo} onChange={setLogo} />
             <div>
               <label className="form-label">Currency</label>
               <select className="form-input" value={currency} onChange={(e) => setCurrency(e.target.value)}>
