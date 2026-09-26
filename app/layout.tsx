@@ -12,8 +12,9 @@ const nunitoSans = Nunito_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Karia Diamond - Invoice Generator",
-  description: "Generate domestic and export invoices for Karia Diamond",
+  title: "Karia Diamond LLP - Invoice Generator",
+  icons: { icon: "/logo.jpg" },
+  description: "Generate domestic and export invoices for Karia Diamond LLP",
 };
 
 export default function RootLayout({

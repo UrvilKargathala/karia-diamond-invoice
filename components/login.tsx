@@ -26,10 +26,9 @@ export function LoginScreen() {
         </div>
 
         <div className="relative z-10 text-center px-12">
-          <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-white/10">
-            <span className="text-3xl font-bold">KD</span>
-          </div>
-          <h1 className="text-3xl font-bold tracking-wide mb-3">KARIA DIAMOND</h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-24 h-24 rounded-2xl object-cover mx-auto mb-6 shadow-lg" />
+          <h1 className="text-3xl font-bold tracking-wide mb-3">KARIA DIAMOND LLP</h1>
           <p className="text-white/50 text-sm mb-8">Invoice Generator</p>
           <div className="w-16 h-px bg-white/20 mx-auto mb-8" />
           <p className="text-white/40 text-sm max-w-xs leading-relaxed">
@@ -38,7 +37,7 @@ export function LoginScreen() {
         </div>
 
         <div className="absolute bottom-8 text-white/20 text-xs">
-          Karia India LLP
+          Karia Diamond LLP
         </div>
       </div>
 
@@ -47,10 +46,9 @@ export function LoginScreen() {
         <div className="w-full max-w-sm">
           {/* Mobile-only branding */}
           <div className="md:hidden text-center mb-8">
-            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-lg">KD</span>
-            </div>
-            <h1 className="text-2xl font-bold">Karia Diamond</h1>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-16 h-16 rounded-2xl object-cover mx-auto mb-4 border" />
+            <h1 className="text-2xl font-bold">Karia Diamond LLP</h1>
             <p className="text-sm text-gray-500 mt-1">Invoice Generator</p>
           </div>
 
@@ -91,7 +89,7 @@ export function LoginScreen() {
             </button>
           </form>
 
-          <p className="text-center text-xs text-gray-400 mt-6 md:hidden">Karia India LLP</p>
+          <p className="text-center text-xs text-gray-400 mt-6 md:hidden">Karia Diamond LLP</p>
         </div>
       </div>
     </div>

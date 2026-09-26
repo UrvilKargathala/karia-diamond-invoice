@@ -7,7 +7,6 @@ import {
   FilePlus,
   FileText,
   Globe,
-  Home as HomeIcon,
   X,
   LogOut,
   Moon,
@@ -67,11 +66,10 @@ export function Sidebar({
     >
       <div className="px-5 h-16 flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center gap-3" onClick={onNavigate}>
-          <div className="w-9 h-9 bg-[color:var(--color-primary)] rounded-xl flex items-center justify-center shadow-md shadow-blue-500/25">
-            <HomeIcon size={16} className="text-white" />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="Karia Diamond LLP" className="w-10 h-10 rounded-xl object-cover shrink-0" />
           <div>
-            <div className="font-bold text-sm tracking-wide leading-tight">KARIA DIAMOND</div>
+            <div className="font-bold text-sm tracking-wide leading-tight">KARIA DIAMOND LLP</div>
             <div className="text-[10px] text-gray-400 font-medium">Invoice Generator</div>
           </div>
         </Link>
@@ -125,7 +123,7 @@ export function Sidebar({
           <LogOut size={17} />
           Sign Out
         </button>
-        <div className="text-[10px] text-gray-400 px-3 pt-1">Karia India LLP</div>
+        <div className="text-[10px] text-gray-400 px-3 pt-1">Karia Diamond LLP</div>
       </div>
     </aside>
   );

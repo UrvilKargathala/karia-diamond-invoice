@@ -21,8 +21,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
         <button onClick={() => setOpen(true)} className="p-1">
           <Menu size={22} />
         </button>
-        <span className="font-semibold ml-3 text-sm tracking-wide">
-          KARIA DIAMOND
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.jpg" alt="" className="w-8 h-8 rounded-lg ml-3 object-cover" />
+        <span className="font-semibold ml-2 text-sm tracking-wide">
+          KARIA DIAMOND LLP
         </span>
       </div>
       {open && (
