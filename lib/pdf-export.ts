@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { LOGO_DATA_URL } from "./logo";
 import type { ExportInvoiceData } from "./types";
 import { numberToWords, formatDate } from "./utils";
 
@@ -15,6 +16,8 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
     doc.setLineWidth(0.3);
     doc.line(margin, y1, pageWidth - margin, y1);
   };
+
+  doc.addImage(LOGO_DATA_URL, "JPEG", margin + 1, y + 0.5, 12, 12);
 
   // ─── Title ───
   doc.setFontSize(14);

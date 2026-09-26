@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { LOGO_DATA_URL } from "./logo";
 import type { DomesticInvoiceData } from "./types";
 import { numberToWords, formatDate, roundOff } from "./utils";
 
@@ -46,6 +47,8 @@ export async function generateDomesticPdf(data: DomesticInvoiceData): Promise<js
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
   doc.text("Tax Invoice", pageWidth / 2, y + 6, { align: "center" });
+
+  doc.addImage(LOGO_DATA_URL, "JPEG", margin + 1, y + 3, 20, 20);
 
   // e-Invoice label + QR code (top right, within title row)
   doc.setFontSize(7);

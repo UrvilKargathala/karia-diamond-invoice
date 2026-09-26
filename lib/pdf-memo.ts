@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { LOGO_DATA_URL } from "./logo";
 import type { ConsignmentMemo } from "./types";
 import { KARIA_INDIA, BRILLIANT_LABGROWN } from "./constants";
 import { formatDate } from "./utils";
@@ -11,6 +12,7 @@ export function generateMemoPdf(memo: ConsignmentMemo): jsPDF {
   const seller = memo.type === "export" ? BRILLIANT_LABGROWN : KARIA_INDIA;
   const cur = memo.type === "domestic" ? "INR" : memo.currency;
 
+  doc.addImage(LOGO_DATA_URL, "JPEG", m + 1, m + 0.5, 12, 12);
   doc.setFont("helvetica", "bold").setFontSize(14);
   doc.text("CONSIGNMENT MEMO", w / 2, m + 6, { align: "center" });
   doc.setFontSize(7).setFont("helvetica", "normal");
