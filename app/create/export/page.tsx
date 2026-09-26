@@ -24,7 +24,7 @@ import { LogoField } from "@/components/logo-field";
 import { KpiCard, Delta, ChartCard } from "@/components/ui";
 import { TrendArea, HighlightBars } from "@/components/charts";
 import { getMonthlyBuckets, getMonthlyValues, getMonthLabels } from "@/components/sparkline";
-import { BRILLIANT_LABGROWN, KARIA_DIAMONDS_INC } from "@/lib/constants";
+import { BRILLIANT_LABGROWN } from "@/lib/constants";
 import type {
   ExportInvoiceData,
   ExportLineItem,
@@ -37,21 +37,35 @@ import type {
 
 const emptyItem: ExportLineItem = {
   slNo: 1,
-  typeShapeColourClarity:
-    "LAB GROWN CUT & POLISHED DIAMOND PLATES (PARTS FOR SEMI CONDUCTORS WAFERS)\nLAB GROWN\nCVD CODE - LGD001",
+  typeShapeColourClarity: "",
   hsnCode: "71049110",
   carats: 0,
   ratePerCarat: 0,
   amount: 0,
 };
 
+const emptyConsignee: CompanyInfo = { name: "", address: "", mobile: "", email: "" };
+
+const emptyShipping: ShippingDetails = {
+  preCarriageBy: "",
+  placeOfReceipt: "",
+  vesselFlightNo: "",
+  portOfLoading: "",
+  portOfDischarge: "",
+  finalDestination: "",
+  countryOfOrigin: "",
+  countryOfFinalDestination: "",
+  marksAndNos: "",
+  noAndKindOfPkgs: "",
+};
+
 const emptyStone: PackingListItem = {
   no: 1,
-  shape: "SQUARE",
+  shape: "",
   stoneId: "",
-  type: "CVD",
-  desc: "WAFERS",
-  size: "10 X 10 X 0.3",
+  type: "",
+  desc: "",
+  size: "",
   pcs: 1,
   weight: 0,
   pricePerCt: 0,
@@ -77,28 +91,19 @@ export default function ExportInvoicePage() {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [logo, setLogo] = useState("");
-  const [paymentTerms, setPaymentTerms] = useState("Advance");
-  const [lutArnNo, setLutArnNo] = useState("AD2403260556888R");
-  const [lutArnDate, setLutArnDate] = useState("28-03-2026");
+  const [paymentTerms, setPaymentTerms] = useState("");
+  const [lutArnNo, setLutArnNo] = useState("");
+  const [lutArnDate, setLutArnDate] = useState("");
   const [currency, setCurrency] = useState("USD");
 
-  const [consignee, setConsignee] = useState<CompanyInfo>({ ...KARIA_DIAMONDS_INC });
+  const [consignee, setConsignee] = useState<CompanyInfo>({ ...emptyConsignee });
   const [shipping, setShipping] = useState<ShippingDetails>({
-    preCarriageBy: "M.A EXPRESS",
-    placeOfReceipt: "N.A.",
-    vesselFlightNo: "",
-    portOfLoading: "SURAT",
-    portOfDischarge: "MASSACHUSETTS",
-    finalDestination: "USA",
-    countryOfOrigin: "INDIA",
-    countryOfFinalDestination: "USA",
-    marksAndNos: "",
-    noAndKindOfPkgs: "One Tin Box",
+    ...emptyShipping,
   });
 
   const [items, setItems] = useState<ExportLineItem[]>([]);
   const [packingList, setPackingList] = useState<PackingListItem[]>([]);
-  const [shippingCharges, setShippingCharges] = useState(250);
+  const [shippingCharges, setShippingCharges] = useState(0);
 
   const [itemDraft, setItemDraft] = useState<{ index: number | null; item: ExportLineItem } | null>(null);
   const [stoneDraft, setStoneDraft] = useState<{ index: number | null; item: PackingListItem } | null>(null);
@@ -171,20 +176,16 @@ export default function ExportInvoicePage() {
     setEditId(null);
     setInvoiceNo("");
     setDate(new Date().toISOString().slice(0, 10));
-    setPaymentTerms("Advance");
+    setPaymentTerms("");
     setLogo("");
-    setLutArnNo("AD2403260556888R");
-    setLutArnDate("28-03-2026");
+    setLutArnNo("");
+    setLutArnDate("");
     setCurrency("USD");
-    setConsignee({ ...KARIA_DIAMONDS_INC });
-    setShipping({
-      preCarriageBy: "M.A EXPRESS", placeOfReceipt: "N.A.", vesselFlightNo: "",
-      portOfLoading: "SURAT", portOfDischarge: "MASSACHUSETTS", finalDestination: "USA",
-      countryOfOrigin: "INDIA", countryOfFinalDestination: "USA", marksAndNos: "", noAndKindOfPkgs: "One Tin Box",
-    });
+    setConsignee({ ...emptyConsignee });
+    setShipping({ ...emptyShipping });
     setItems([]);
     setPackingList([]);
-    setShippingCharges(250);
+    setShippingCharges(0);
     setItemDraft(null);
     setStoneDraft(null);
     setFromMemoId(null);

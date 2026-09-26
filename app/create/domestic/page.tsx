@@ -37,13 +37,13 @@ const emptyBuyer: CompanyInfo = {
   name: "",
   address: "",
   gstin: "",
-  stateCode: "24",
-  stateName: "Gujarat",
+  stateCode: "",
+  stateName: "",
 };
 
 const emptyItem: DomesticLineItem = {
   slNo: 1,
-  description: "Rough Diamond",
+  description: "",
   hsnCode: "71049110",
   quantity: 0,
   unit: "Pcs",
@@ -67,9 +67,9 @@ export default function DomesticInvoicePage() {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [logo, setLogo] = useState("");
-  const [paymentTerms, setPaymentTerms] = useState("15 Days");
-  const [dispatchedThrough, setDispatchedThrough] = useState("Hand to Hand");
-  const [destination, setDestination] = useState("Surat");
+  const [paymentTerms, setPaymentTerms] = useState("");
+  const [dispatchedThrough, setDispatchedThrough] = useState("");
+  const [destination, setDestination] = useState("");
   const [buyer, setBuyer] = useState<CompanyInfo>({ ...emptyBuyer });
   const [isInterState, setIsInterState] = useState(false);
   const [gstCategory, setGstCategory] = useState<"rough" | "polished">("rough");
@@ -138,10 +138,10 @@ export default function DomesticInvoicePage() {
     setEditId(null);
     setInvoiceNo("");
     setDate(new Date().toISOString().slice(0, 10));
-    setPaymentTerms("15 Days");
+    setPaymentTerms("");
     setLogo("");
-    setDispatchedThrough("Hand to Hand");
-    setDestination("Surat");
+    setDispatchedThrough("");
+    setDestination("");
     setBuyer({ ...emptyBuyer });
     setIsInterState(false);
     setGstCategory("rough");
@@ -465,15 +465,15 @@ export default function DomesticInvoicePage() {
             </div>
             <div>
               <label className="form-label">Payment Terms</label>
-              <input type="text" className="form-input" value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} />
+              <input type="text" className="form-input" placeholder="e.g. 15 Days" value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} />
             </div>
             <div>
               <label className="form-label">Dispatched Through</label>
-              <input type="text" className="form-input" value={dispatchedThrough} onChange={(e) => setDispatchedThrough(e.target.value)} />
+              <input type="text" className="form-input" placeholder="e.g. Hand to Hand" value={dispatchedThrough} onChange={(e) => setDispatchedThrough(e.target.value)} />
             </div>
             <div>
               <label className="form-label">Destination</label>
-              <input type="text" className="form-input" value={destination} onChange={(e) => setDestination(e.target.value)} />
+              <input type="text" className="form-input" placeholder="e.g. Surat" value={destination} onChange={(e) => setDestination(e.target.value)} />
             </div>
             <LogoField value={logo} onChange={setLogo} />
           </div>
