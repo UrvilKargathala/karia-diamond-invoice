@@ -48,7 +48,7 @@ export async function generateDomesticPdf(data: DomesticInvoiceData): Promise<js
   doc.setFont("helvetica", "bold");
   doc.text("Tax Invoice", pageWidth / 2, y + 6, { align: "center" });
 
-  doc.addImage(LOGO_DATA_URL, "JPEG", margin + 1, y + 3, 20, 20);
+  doc.addImage(LOGO_DATA_URL, "JPEG", margin + 1, y + 1.5, 24, 24);
 
   // e-Invoice label + QR code (top right, within title row)
   doc.setFontSize(7);

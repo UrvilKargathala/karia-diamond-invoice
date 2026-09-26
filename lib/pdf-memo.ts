@@ -12,14 +12,14 @@ export function generateMemoPdf(memo: ConsignmentMemo): jsPDF {
   const seller = memo.type === "export" ? BRILLIANT_LABGROWN : KARIA_INDIA;
   const cur = memo.type === "domestic" ? "INR" : memo.currency;
 
-  doc.addImage(LOGO_DATA_URL, "JPEG", m + 1, m + 0.5, 12, 12);
+  doc.addImage(LOGO_DATA_URL, "JPEG", m + 1, m + 1, 17, 17);
   doc.setFont("helvetica", "bold").setFontSize(14);
-  doc.text("CONSIGNMENT MEMO", w / 2, m + 6, { align: "center" });
+  doc.text("CONSIGNMENT MEMO", w / 2, m + 9, { align: "center" });
   doc.setFontSize(7).setFont("helvetica", "normal");
-  doc.text("Goods sent on approval - not a sale", w / 2, m + 10, { align: "center" });
-  doc.rect(m, m + 13, w - m * 2, 0.01);
+  doc.text("Goods sent on approval - not a sale", w / 2, m + 14, { align: "center" });
+  doc.rect(m, m + 19, w - m * 2, 0.01);
 
-  let y = m + 19;
+  let y = m + 25;
   const block = (title: string, name: string, addr: string, x: number, extra?: string) => {
     doc.setFontSize(8).setFont("helvetica", "bold").text(title, x, y);
     doc.text(name, x, y + 4);
@@ -33,8 +33,8 @@ export function generateMemoPdf(memo: ConsignmentMemo): jsPDF {
   block("From", seller.name, seller.address, m, seller.gstin && `GSTIN: ${seller.gstin}`);
   block("To", memo.buyer.name, memo.buyer.address, w / 2 + 5, memo.buyer.gstin && `GSTIN: ${memo.buyer.gstin}`);
   doc.setFont("helvetica", "bold");
-  doc.text(`Memo No: ${memo.memoNo}`, w - m, m + 19, { align: "right" });
-  doc.text(`Date: ${formatDate(memo.date)}`, w - m, m + 23, { align: "right" });
+  doc.text(`Memo No: ${memo.memoNo}`, w - m, m + 25, { align: "right" });
+  doc.text(`Date: ${formatDate(memo.date)}`, w - m, m + 29, { align: "right" });
 
   autoTable(doc, {
     startY: y + 28,

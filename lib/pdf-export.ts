@@ -17,13 +17,13 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
     doc.line(margin, y1, pageWidth - margin, y1);
   };
 
-  doc.addImage(LOGO_DATA_URL, "JPEG", margin + 1, y + 0.5, 12, 12);
+  doc.addImage(LOGO_DATA_URL, "JPEG", margin + 1, y + 1, 17, 17);
 
   // ─── Title ───
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("TAX INVOICE", pageWidth / 2, y + 6, { align: "center" });
-  y += 8;
+  doc.text("TAX INVOICE", pageWidth / 2, y + 8, { align: "center" });
+  y += 11;
   doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
   doc.text(
@@ -32,7 +32,7 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
     y + 3,
     { align: "center" }
   );
-  y += 5;
+  y += 5 + 6;
   drawLine(y);
 
   // ─── Exporter & Invoice Details ───
