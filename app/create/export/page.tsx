@@ -94,7 +94,7 @@ export default function ExportInvoicePage() {
   const [paymentTerms, setPaymentTerms] = useState("");
   const [lutArnNo, setLutArnNo] = useState("");
   const [lutArnDate, setLutArnDate] = useState("");
-  const [declarations, setDeclarations] = useState(DEFAULT_EXPORT_DECLARATIONS);
+  const [declarations, setDeclarations] = useState("");
   const [currency, setCurrency] = useState("USD");
 
   const [consignee, setConsignee] = useState<CompanyInfo>({ ...emptyConsignee });
@@ -181,7 +181,7 @@ export default function ExportInvoicePage() {
     setLogo("");
     setLutArnNo("");
     setLutArnDate("");
-    setDeclarations(DEFAULT_EXPORT_DECLARATIONS);
+    setDeclarations("");
     setCurrency("USD");
     setConsignee({ ...emptyConsignee });
     setShipping({ ...emptyShipping });
@@ -208,7 +208,7 @@ export default function ExportInvoicePage() {
         setLogo(d.logo || "");
         setLutArnNo(d.lutArnNo || "");
         setLutArnDate(d.lutArnDate || "");
-        setDeclarations(d.declarations || DEFAULT_EXPORT_DECLARATIONS);
+        setDeclarations(d.declarations || "");
         setCurrency((d as ExportInvoiceData & { currency?: string }).currency || "USD");
         setConsignee(d.consignee);
         setShipping(d.shipping);
@@ -445,11 +445,19 @@ export default function ExportInvoicePage() {
             <div className="sm:col-span-2 lg:col-span-3">
               <div className="flex items-center justify-between">
                 <label className="form-label">Declarations (printed at the bottom of the invoice)</label>
-                <button type="button" className="text-xs text-blue-600 hover:underline" onClick={() => setDeclarations(DEFAULT_EXPORT_DECLARATIONS)}>
-                  Reset to default
-                </button>
+                {declarations && (
+                  <button type="button" className="text-xs text-blue-600 hover:underline" onClick={() => setDeclarations("")}>
+                    Use default
+                  </button>
+                )}
               </div>
-              <textarea className="form-input font-mono text-xs" rows={8} value={declarations} onChange={(e) => setDeclarations(e.target.value)} />
+              <textarea
+                className="form-input font-mono text-xs"
+                rows={8}
+                placeholder={DEFAULT_EXPORT_DECLARATIONS}
+                value={declarations}
+                onChange={(e) => setDeclarations(e.target.value)}
+              />
             </div>
             <div>
               <label className="form-label">Currency</label>
