@@ -10,6 +10,7 @@ import {
   Undo2,
   Eye,
   Download,
+  Copy,
 } from "lucide-react";
 import { Modal } from "@/components/modal";
 import { SlideOver } from "@/components/slide-over";
@@ -164,6 +165,16 @@ export default function MemosPage() {
     (await memoPdf(memo)).save(`${memo.memoNo.replace(/\//g, "_")}.pdf`);
   };
 
+  const openDuplicate = (memo: ConsignmentMemo) => {
+    setEditId(null);
+    setType(memo.type);
+    setDate(new Date().toISOString().slice(0, 10));
+    setCurrency(memo.currency);
+    setBuyer({ ...memo.buyer });
+    setItems(memo.items.map((i) => ({ ...i })));
+    setPanelOpen(true);
+  };
+
   const handleConvert = (memo: ConsignmentMemo) => {
     router.push(`/create/${memo.type}?fromMemo=${memo.id}`);
   };
@@ -303,11 +314,14 @@ export default function MemosPage() {
                             <button onClick={() => handleReturn(memo)} className="p-1.5 text-gray-400 hover:text-amber-600 rounded hover:bg-amber-50" title="Mark Returned">
                               <Undo2 size={14} />
                             </button>
-                            <button onClick={() => openEdit(memo)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50" title="Edit">
-                              <Pencil size={14} />
-                            </button>
                           </>
                         )}
+                        <button onClick={() => openEdit(memo)} className="p-1.5 text-gray-400 hover:text-amber-600 rounded hover:bg-amber-50" title="Edit">
+                          <Pencil size={14} />
+                        </button>
+                        <button onClick={() => openDuplicate(memo)} className="p-1.5 text-gray-400 hover:text-green-600 rounded hover:bg-green-50" title="Duplicate">
+                          <Copy size={14} />
+                        </button>
                         <button onClick={() => handleDelete(memo.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50" title="Delete">
                           <Trash2 size={14} />
                         </button>
