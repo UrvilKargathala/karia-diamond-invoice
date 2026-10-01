@@ -24,7 +24,7 @@ import { LogoField } from "@/components/logo-field";
 import { KpiCard, Delta, ChartCard } from "@/components/ui";
 import { TrendArea, HighlightBars } from "@/components/charts";
 import { getMonthlyBuckets, getMonthlyValues, getMonthLabels } from "@/components/sparkline";
-import { BRILLIANT_LABGROWN, DEFAULT_EXPORT_DECLARATIONS } from "@/lib/constants";
+import { BRILLIANT_LABGROWN } from "@/lib/constants";
 import type {
   ExportInvoiceData,
   ExportLineItem,
@@ -447,17 +447,18 @@ export default function ExportInvoicePage() {
                 <label className="form-label">Declarations (printed at the bottom of the invoice)</label>
                 {declarations && (
                   <button type="button" className="text-xs text-blue-600 hover:underline" onClick={() => setDeclarations("")}>
-                    Use default
+                    Clear
                   </button>
                 )}
               </div>
               <textarea
                 className="form-input font-mono text-xs"
-                rows={8}
-                placeholder={DEFAULT_EXPORT_DECLARATIONS}
+                rows={6}
+                placeholder="Leave blank to print the standard RoDTEP / conflict-free declarations"
                 value={declarations}
                 onChange={(e) => setDeclarations(e.target.value)}
               />
+              <p className="text-xs text-gray-400 mt-1">Blank uses the standard wording on the PDF. Type here only to override it for this invoice.</p>
             </div>
             <div>
               <label className="form-label">Currency</label>
