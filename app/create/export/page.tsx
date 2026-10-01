@@ -24,7 +24,7 @@ import { LogoField } from "@/components/logo-field";
 import { KpiCard, Delta, ChartCard } from "@/components/ui";
 import { TrendArea, HighlightBars } from "@/components/charts";
 import { getMonthlyBuckets, getMonthlyValues, getMonthLabels } from "@/components/sparkline";
-import { BRILLIANT_LABGROWN } from "@/lib/constants";
+import { BRILLIANT_LABGROWN, DEFAULT_EXPORT_DECLARATIONS } from "@/lib/constants";
 import type {
   ExportInvoiceData,
   ExportLineItem,
@@ -94,6 +94,7 @@ export default function ExportInvoicePage() {
   const [paymentTerms, setPaymentTerms] = useState("");
   const [lutArnNo, setLutArnNo] = useState("");
   const [lutArnDate, setLutArnDate] = useState("");
+  const [declarations, setDeclarations] = useState(DEFAULT_EXPORT_DECLARATIONS);
   const [currency, setCurrency] = useState("USD");
 
   const [consignee, setConsignee] = useState<CompanyInfo>({ ...emptyConsignee });
@@ -180,6 +181,7 @@ export default function ExportInvoicePage() {
     setLogo("");
     setLutArnNo("");
     setLutArnDate("");
+    setDeclarations(DEFAULT_EXPORT_DECLARATIONS);
     setCurrency("USD");
     setConsignee({ ...emptyConsignee });
     setShipping({ ...emptyShipping });
@@ -206,6 +208,7 @@ export default function ExportInvoicePage() {
         setLogo(d.logo || "");
         setLutArnNo(d.lutArnNo || "");
         setLutArnDate(d.lutArnDate || "");
+        setDeclarations(d.declarations || DEFAULT_EXPORT_DECLARATIONS);
         setCurrency((d as ExportInvoiceData & { currency?: string }).currency || "USD");
         setConsignee(d.consignee);
         setShipping(d.shipping);
@@ -279,7 +282,7 @@ export default function ExportInvoicePage() {
   const buildData = (): ExportInvoiceData => ({
     logo: logo || undefined, invoiceNo, date, exporterRef: BRILLIANT_LABGROWN.iecNo || "", exporter: BRILLIANT_LABGROWN,
     consignee, shipping, paymentTerms, items, packingList, shippingCharges, lutArnNo, lutArnDate,
-    currency,
+    currency, declarations,
   } as ExportInvoiceData);
 
   const handlePreview = async () => {
@@ -439,6 +442,15 @@ export default function ExportInvoicePage() {
             <div><label className="form-label">LUT/ARN No.</label><input type="text" className="form-input" value={lutArnNo} onChange={(e) => setLutArnNo(e.target.value)} /></div>
             <div><label className="form-label">LUT/ARN Date</label><input type="text" className="form-input" value={lutArnDate} onChange={(e) => setLutArnDate(e.target.value)} /></div>
             <LogoField value={logo} onChange={setLogo} />
+            <div className="sm:col-span-2 lg:col-span-3">
+              <div className="flex items-center justify-between">
+                <label className="form-label">Declarations (printed at the bottom of the invoice)</label>
+                <button type="button" className="text-xs text-blue-600 hover:underline" onClick={() => setDeclarations(DEFAULT_EXPORT_DECLARATIONS)}>
+                  Reset to default
+                </button>
+              </div>
+              <textarea className="form-input font-mono text-xs" rows={8} value={declarations} onChange={(e) => setDeclarations(e.target.value)} />
+            </div>
             <div>
               <label className="form-label">Currency</label>
               <select className="form-input" value={currency} onChange={(e) => setCurrency(e.target.value)}>

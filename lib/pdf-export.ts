@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import { drawLogo } from "./logo";
 import type { ExportInvoiceData } from "./types";
 import { numberToWords, formatDate } from "./utils";
+import { DEFAULT_EXPORT_DECLARATIONS } from "./constants";
 
 export function generateExportPdf(data: ExportInvoiceData): jsPDF {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -305,17 +306,11 @@ export function generateExportPdf(data: ExportInvoiceData): jsPDF {
   doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
 
-  const declarations = [
-    "We intend to claim benefit under RoDTEP scheme as applicable:",
-    "The diamonds herein invoiced have been purchased from legitimate sources not involved in funding conflict and in compliance with United Nations resolutions.",
-    "",
-    "The seller hereby guarantees that these diamonds are conflict free, based on personal knowledge and /or written guarantees provided by the supplier of these diamonds.",
-    "",
-    "Declaration:We declare that this invoice shows the actul price of the goods described and that all partculars are ture and correct. To the best of our knowledge and/or written",
-    "assurance from our supplier, we state that \"Diamonds herein invoiced not obtained in violation of applicable national laws and/or sanctions by the US Department of treasury office of",
-    "Foreign Assets Control(OFAC).",
-    '"Not subject to restrictions of Reg.EU 833/2014"',
-  ];
+  const declarationLines = (data.declarations || DEFAULT_EXPORT_DECLARATIONS).split("\n");
+  // wrap long lines to the page width so a custom/edited declaration never overflows
+  const declarations = declarationLines.flatMap((line) =>
+    line ? (doc.splitTextToSize(line, contentWidth - 4) as string[]) : [""]
+  );
 
   let dy = y + 4;
   declarations.forEach((line) => {

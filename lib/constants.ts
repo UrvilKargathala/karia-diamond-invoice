@@ -56,3 +56,14 @@ export const HSN_CODES = [
   { code: "71023100", description: "Non-industrial diamonds, unworked" },
   { code: "71042010", description: "Piezo-electric quartz" },
 ];
+
+// Default legal declarations block printed on export invoices; editable per invoice.
+export const DEFAULT_EXPORT_DECLARATIONS = `We intend to claim benefit under RoDTEP scheme as applicable:
+The diamonds herein invoiced have been purchased from legitimate sources not involved in funding conflict and in compliance with United Nations resolutions.
+
+The seller hereby guarantees that these diamonds are conflict free, based on personal knowledge and/or written guarantees provided by the supplier of these diamonds.
+
+Declaration: We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct. To the best of our knowledge and/or written
+assurance from our supplier, we state that "Diamonds herein invoiced not obtained in violation of applicable national laws and/or sanctions by the US Department of treasury office of
+Foreign Assets Control (OFAC)."
+"Not subject to restrictions of Reg.EU 833/2014"`;

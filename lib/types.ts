@@ -107,6 +107,7 @@ export interface ExportInvoiceData {
   lutArnNo?: string;
   lutArnDate?: string;
   currency?: string;
+  declarations?: string;
 }
 
 // ─── Stored Invoice ───
